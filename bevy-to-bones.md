@@ -10,28 +10,28 @@ Major points to cover:
 
 <!-- .slide: data-timing="10" -->
 
-**Accidentally Making a Game Engine** <!-- .element: class="fragment" data -->
+**"Accidentally" Making a Game Engine** <!-- .element: class="fragment" data -->
 
 Notes:
 
 - Hey everyone!
-- Today I'm going to talk about the journey that me and the Jumpy community made
-  as we transitioned away from Bevy,
+- Today I'm going to talk about mine and the Jumpy community's journey from Bevy to Bones
 - ⏭️
-- and accidentally a game engine.
+- as we "accidentally" made a game engine.
 
 ---
 
-<!-- .slide: data-auto-animate -->
+<!-- .slide: data-auto-animate data-timing="5" -->
 
 Isn't This a _Bevy_ Meetup?
 
 Notes:
 - The first thing you might be asking is, "isn't this a _Bevy_ meetup?
-- ⏭
+- The answer to that of course is yes, but
+- as you'll see ⏭
 ---
 
-<!-- .slide: data-auto-animate -->
+<!-- .slide: data-auto-animate data-timing="10" -->
 
 Isn't This a _Bevy_ Meetup?
 
@@ -42,8 +42,7 @@ Bones is like Bevy's **little brother**
 <!-- .element: class="fragment" style="margin-top: 1em"  -->
 
 Notes:
-- The answer to that of course is yes, but
-- ⏭️ as you'll see, we couldn't have made Bones without Bevy
+- we couldn't have made Bones without Bevy
 - Bones was **heavily** influenced by Bevy's design and is in fact
 - ⏭️ kind of like Bevy's little brother.
 ---
@@ -54,17 +53,17 @@ Notes:
 
 2D <!-- .element: class="fragment fade-left"  -->
 
-Fishy <!-- .element: class="fragment fade-right"  -->
+Multiplayer <!-- .element: class="fragment fade-right"  -->
 
 Shooter Game <!-- .element: class="fragment fade-up"  -->
 
-✨ Modding ✨ <!-- .element: class="fragment"  -->
+✨ With Modding ✨ <!-- .element: class="fragment"  -->
 
 Notes:
 - That brings us to "What is Jumpy?"
 - Jumpy is a
 - ⏭ ️2D
-- ⏭️ Fishy
+- ⏭️ Multiplayer
 - ⏭️ Shooter Game
 - that's all about fun couch play, emergent gameplay, and ⏭️
 - ✨ _modding_ ✨
