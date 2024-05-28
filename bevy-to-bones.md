@@ -10,7 +10,7 @@ Major points to cover:
 
 <!-- .slide: data-timing="10" -->
 
-**"Accidentally" Making a Game Engine** <!-- .element: class="fragment" data -->
+**"Accidentally" Making a Game Engine**
 
 Notes:
 
@@ -69,4 +69,27 @@ Notes:
 - ✨ _modding_ ✨
 
 ---
+
+### Rewriting Jumpy In Bevy
+
+<ul style="margin-top: 1em">
+    <li>Jumpy was using <a href="https://macroquad.rs/" target="_blank">Macroquad</a></li>
+    <li>We were already using Bevy for <a href="https://github.com/fishfolk/punchy/" target="_blank">Punchy</a></li>
+    <li>We already had Bevy investments
+        <ul>
+            <li>Asset Loader</li>
+            <li>JS Scripting</li>
+        </ul>
+    </li>
+</ul>
+
+Notes:
+- When I took over as lead developer for Jumpy, it was currently written with Macroquad.
+- But we were already using bevy for Punchy, another game in the Fish Folk universe.
+- On top of that, I had already invested a lot in Bevy with Punchy's flexible asset loading setup
+- **and** a working proof-of-concept for JavaScript modding.
+- I was really liking the way Bevy was working, and with our focus on modding, the promise of being
+able to use our new JS scripting in Jumpy was a lot of our motivation to do a full rewrite for Jumpy.
+
+
 
