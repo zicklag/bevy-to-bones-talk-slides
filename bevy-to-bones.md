@@ -98,7 +98,7 @@ Notes:
 - Good cross-platform support
 - We already had prior Bevy investments:
   - Nested YAML Asset System
-  - <span style="display: flex; align-items: center;">Scriptable ECS: <code style="font-size: 0.7em; margin-left: 0.5em;">bevy_mod_js_scripting</code></span>
+  - <span style="display: flex; align-items: center;">Scripting: <code style="font-size: 0.7em; margin-left: 0.5em;">bevy_mod_js_scripting</code></span>
 
 Notes:
 
@@ -142,72 +142,122 @@ Notes:
 
 ---
 
-<!-- .slide: data-auto-animate data-timing="10" data-background-image="networking-cc0-upscaled.png" data-background-opacity="0.85" -->
+<!-- .slide: data-auto-animate data-timing="10" data-background-image="networking-cc0-upscaled.png" data-background-opacity="0.85" data-background-transition="zoom" -->
 
-<h2><span style="background-color: hsla(0, 0%, 8%, 0.95); padding: 0.2em 0.3em; border-radius: 0.2em">Networking</span></h3>
+<h2><span style="background-color: hsla(0, 0%, 8%, 0.95); padding: 0.2em 0.3em; border-radius: 0.2em;">Networking</span></h3>
 
 Notes:
 - Networking.
 
 ---
 
-<!-- .slide: data-auto-animate data-timing="10" data-background-image="networking-cc0-upscaled.png" data-background-opacity="0.85" -->
+<!-- .slide: data-auto-animate data-timing="10" -->
 
-<h2><span style="background-color: hsla(0, 0%, 8%, 0.95); padding: 0.2em 0.3em; border-radius: 0.2em">Networking</span></h3>
+<h2 style="position: relative; top: -1em">Networking</h2>
+<div style="position: relative; top: -2em; font-size: 0.9em">
 
-<div style="font-size: 0.8em">
-<div>
-<span style="background-color: hsla(0, 0%, 8%, 0.95); padding: 0.2em 0.3em; border-radius: 0.2em">Naïve Client-Server</span>
-</div>
+<h3 style="color: #22D491;">Naïve Client-Server</h4>
 
-<div style="margin: 0.75em;">
-<span style="background-color: hsla(0, 0%, 8%, 0.95); padding: 0.2em 0.3em; border-radius: 0.2em;">With Horrible Visual Glitching</span>
-</div>
-
+- Horrible skipping and jittering during play
+- Networking code is mixed with gameplay code
 </div>
 
 Notes:
 - I started off with a client-server model, running a headless Bevy instance on the server and synchronizing transforms.
-- This had horrible visual glitching because players were skipping around and jittering constantly.
-- It was a good POC, but now I had to figure out how to make things look nice.
+- While it kind of worked, the players were constantly skipping and jittering around during play.
+- Additionally, the networking code had to be mixed in with the gameplay code. It was easy to make a change in the game that would
+break networking unintentionally.
+---
+
+<!-- .slide: data-timing="1" -->
+
+<h2 style="position: relative; top: -1em">Networking</h2>
+<div style="position: relative; top: -2em; font-size: 0.9em">
+
+<h3 style="color: #22D491;">Client-Server With Latency Compensation</h4>
+
+- Requires some form of sync-then-fast-forward.
+</div>
+
+Notes:
+- After doing more research I found out that, in order to get smoother network play, I have to take into account the network latency between the client and the server.
+- This means that when the client gets an update from the server, the game must realize that the update actually came from, say 100ms ago, because of the network ping, and
+then it has to actually play the game in fast-forward, behind the scenes, to catch up to the present time.
+- This was doable, for sure, but if I was going to bother with syncing and fast-forwarding, this was going to be harder than I thought, and it was worth considering another networking model first.
+---
+
+<!-- .slide: data-timing="30" -->
+
+<h2 style="position: relative; top: -1em">Networking</h2>
+<div style="position: relative; top: -2em; font-size: 0.9em">
+
+<h3 style="color: #22D491;">Peer-to-Peer Rollback</h4>
+
+- Doesn't require servers!
+- Requires <u>Determinism</u> and <u>Snapshot & Restore</u>
+- Gameplay code doesn't change or mix with network code.
+
+Notes:
+- Peer-to-peer rollback networking does a similar rewind and fast-forward thing, but it doesn't require running a headless Bevy instance on a server.
+- That's really handy for making network gaming inexpensive or even free, which is a big deal for our idea of "Everlasting games".
+- The caveat is that it requires the game to be deterministic, and to support snapshot and restore.
+- These features are harder to get than they might seem, but there's a great payoff.
+- The peer-to-peer model gets you essentially the most fair and best feeling networking out of any other solution I've found.
+- It also had one other big advantage:
+- The networking code could stay completely separate from the gameplay code.
+- This would make it **way** easier for us to ensure that network games worked just as well as local games.
+- Lucky for us, Bevy already had peer-to-peer networking plugin, called Bevy GGRS.
+</div>
 
 ---
 
-<!-- .slide: data-auto-animate data-timing="10" data-background-image="networking-cc0-upscaled.png" data-background-opacity="0.85" -->
+<!-- .slide: data-timing="30" -->
 
-<h2><span style="background-color: hsla(0, 0%, 8%, 0.95); padding: 0.2em 0.3em; border-radius: 0.2em">Networking</span></h3>
+### Bevy GGRS
 
-<div style="font-size: 0.8em">
-<div>
-<span style="background-color: hsla(0, 0%, 8%, 0.95); padding: 0.2em 0.3em; border-radius: 0.2em">Client-Side Prediction</span>
-</div>
+<div style="font-size: 0.6em">
 
-<div style="margin: 0.75em;">
-<span style="background-color: hsla(0, 0%, 8%, 0.95); padding: 0.2em 0.3em; border-radius: 0.2em;">Needs Rewind and Fast-Forward</span>
-</div>
+<style>
+code {
+    font-size: 0.8em
+}
+</style>
+
+- ✅ Handles the snapshot / restore for you!
+- ❌ You have to be careful not to break snapshots or determinism:
+  - Can't use events or `Local<State>` parameters
+  - All queries must be sorted
+  - You must attach a rollback ID to synced entities
+  - Storing `Entity`s in components requires special handling
+  - `GlobalTransform`s can't be read
+  - You must be careful with entity hierarchies in some situations
 
 </div>
 
 Notes:
-- After doing more research I found that the answer is to do "client-side-prediction", which basically means being able to run the game,
-but be to jump back to server snapshots, while fast-forwarding the game back to the present to compensate for latency.
+- We started using Bevy GGRS for Jumpy, and we were very happy with how it simplified the game code.
+- Unfortunately, we ran into some serious gotchas.
+- Bevy's design is seriously focused on performance, and that, in most cases, comes at the expense of determinism.
+- Not much of Bevy is deterministic, and even less of it lends itself to snapshot and restore.
+- This meant that there were a lot of features in Bevy that we had to be careful not to use.
+- Beyond that, normal things in Bevy, such as making a query, now required more boilerplate, because we had to sort the query results before iterating over them.
+- All of these things are really easy to miss, and it was now a looming threat that every change we made to the game, we could accidentally break determinism.
+- It felt like a new kind of "undefined behavior" to avoid, and all the code was now `unsafe`.
+- These issues weren't GGRS's fault, there were just no good ways get deterministic snapshots in Bevy.
 
 ---
 
-<!-- .slide: data-auto-animate data-timing="10" data-background-image="networking-cc0-upscaled.png" data-background-opacity="0.85" -->
+<!-- .slide: data-timing="10" -->
 
-<h2><span style="background-color: hsla(0, 0%, 8%, 0.95); padding: 0.2em 0.3em; border-radius: 0.2em">Networking</span></h3>
+### A Deterministic Box
 
-<div style="font-size: 0.8em">
-<div>
-<span style="background-color: hsla(0, 0%, 8%, 0.95); padding: 0.2em 0.3em; border-radius: 0.2em">Determinism</span>
-</div>
+A _tiny_, deterministic ECS
 
-<div style="margin: 0.75em;">
-<span style="background-color: hsla(0, 0%, 8%, 0.95); padding: 0.2em 0.3em; border-radius: 0.2em;">&</span>
-</div>
+With a `World` that you can `.clone()`
 
-<div>
-<span style="background-color: hsla(0, 0%, 8%, 0.95); padding: 0.2em 0.3em; border-radius: 0.2em">Snapshot / Restore</span>
-</div>
-</div>
+Notes:
+- This led to a good deal of thinking about possible solutions.
+- We could re-consider client-server, but it felt like we'd still have a similar feeling of "undefined behavior" by having
+to handle networking-specific messages and gameplay handling.
+- I started thinking about what it would take to put the core Jumpy gameplay logic in it's own "Box", that only had deterministic tools in it.
+- I started investigating how to make our own small, deterministic ECS that we could use in that Box.
