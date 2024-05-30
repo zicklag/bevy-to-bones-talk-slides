@@ -6,6 +6,13 @@ Major points to cover:
 - What the technology ended up, and how it works.
  -->
 
+<style>
+code {
+    font-size: 0.8em;
+    color: #C98BFF;
+}
+</style>
+
 ### From Bevy to Bones
 
 <!-- .slide: data-timing="10" -->
@@ -147,6 +154,7 @@ Notes:
 <h2><span style="background-color: hsla(0, 0%, 8%, 0.95); padding: 0.2em 0.3em; border-radius: 0.2em;">Networking</span></h3>
 
 Notes:
+
 - Networking.
 
 ---
@@ -163,10 +171,12 @@ Notes:
 </div>
 
 Notes:
+
 - I started off with a client-server model, running a headless Bevy instance on the server and synchronizing transforms.
 - While it kind of worked, the players were constantly skipping and jittering around during play.
 - Additionally, the networking code had to be mixed in with the gameplay code. It was easy to make a change in the game that would
-break networking unintentionally.
+  break networking unintentionally.
+
 ---
 
 <!-- .slide: data-timing="1" -->
@@ -180,10 +190,12 @@ break networking unintentionally.
 </div>
 
 Notes:
+
 - After doing more research I found out that, in order to get smoother network play, I have to take into account the network latency between the client and the server.
 - This means that when the client gets an update from the server, the game must realize that the update actually came from, say 100ms ago, because of the network ping, and
-then it has to actually play the game in fast-forward, behind the scenes, to catch up to the present time.
+  then it has to actually play the game in fast-forward, behind the scenes, to catch up to the present time.
 - This was doable, for sure, but if I was going to bother with syncing and fast-forwarding, this was going to be harder than I thought, and it was worth considering another networking model first.
+
 ---
 
 <!-- .slide: data-timing="30" -->
@@ -198,6 +210,7 @@ then it has to actually play the game in fast-forward, behind the scenes, to cat
 - Gameplay code doesn't change or mix with network code.
 
 Notes:
+
 - Peer-to-peer rollback networking does a similar rewind and fast-forward thing, but it doesn't require running a headless Bevy instance on a server.
 - That's really handy for making network gaming inexpensive or even free, which is a big deal for our idea of "Everlasting games".
 - The caveat is that it requires the game to be deterministic, and to support snapshot and restore.
@@ -217,33 +230,30 @@ Notes:
 
 <div style="font-size: 0.6em">
 
-<style>
-code {
-    font-size: 0.8em
-}
-</style>
-
-- ✅ Handles the snapshot / restore for you!
-- ❌ You have to be careful not to break snapshots or determinism:
+- ✅ &nbsp; Handles the snapshot / restore for you!
+- ❌ &nbsp; You have to be careful not to break snapshots or determinism:
   - Can't use events or `Local<State>` parameters
-  - All queries must be sorted
-  - You must attach a rollback ID to synced entities
-  - Storing `Entity`s in components requires special handling
   - `GlobalTransform`s can't be read
+  - All queries must be sorted
+  - You must attach a `RollbackId` to synced entities
   - You must be careful with entity hierarchies in some situations
+  - Storing `Entity`s in components requires implementing `MapEntities`
 
 </div>
 
 Notes:
+
 - We started using Bevy GGRS for Jumpy, and we were very happy with how it simplified the game code.
-- Unfortunately, we ran into some serious gotchas.
-- Bevy's design is seriously focused on performance, and that, in most cases, comes at the expense of determinism.
+- Unfortunately, we ran into some big issues.
+- Bevy's design is very focused on performance, and that, in most cases, comes at the expense of determinism.
 - Not much of Bevy is deterministic, and even less of it lends itself to snapshot and restore.
-- This meant that there were a lot of features in Bevy that we had to be careful not to use.
-- Beyond that, normal things in Bevy, such as making a query, now required more boilerplate, because we had to sort the query results before iterating over them.
-- All of these things are really easy to miss, and it was now a looming threat that every change we made to the game, we could accidentally break determinism.
-- It felt like a new kind of "undefined behavior" to avoid, and all the code was now `unsafe`.
-- These issues weren't GGRS's fault, there were just no good ways get deterministic snapshots in Bevy.
+- This meant that there were a lot of Bevy features we either couldn't use, or had to be extra careful with.
+- Things like events, `Local` system params, and `GlobalTransforms` couldn't be used.
+- Almost all queries had to be collected into a vector and sorted before we could safely iterate over them, to avoid the non-deterministic iteration order.
+- Finally, you have to attack rollback IDs to entities you want to sync, you have to be careful with how you use hierarchies, and storing `Entity`s in components requires implementing an extra `MapEntities` trait for that component.
+- All of these things were really easy to miss, and it was now a looming threat that with every change we made to the game, we could accidentally break determinism.
+- It felt like a new kind of "undefined behavior" to avoid, and for that matter, all the code was now `unsafe`.
+- These issues weren't GGRS's fault, there were just no good ways get deterministic snapshot restore in Bevy.
 
 ---
 
@@ -257,7 +267,8 @@ With a `World` that you can `.clone()`
 
 Notes:
 - This led to a good deal of thinking about possible solutions.
-- We could re-consider client-server, but it felt like we'd still have a similar feeling of "undefined behavior" by having
-to handle networking-specific messages and gameplay handling.
-- I started thinking about what it would take to put the core Jumpy gameplay logic in it's own "Box", that only had deterministic tools in it.
-- I started investigating how to make our own small, deterministic ECS that we could use in that Box.
+- We could re-consider client-server, but it felt like we'd still have a similar feeling of "undefined behavior" by having to do network-specific handling
+  all throughout our gameplay code again.
+- I started thinking about what it would take to put the Jumpy's core gameplay logic in it's own deterministic "Box".
+- We could make our own simple ECS that we could use, and we could make the whole world `.clone()`-able so that it would be trivial to snapshot and restore.
+- Or better than making our own, we could just find somebody else who did it.
