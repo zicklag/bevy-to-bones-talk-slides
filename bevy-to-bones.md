@@ -207,7 +207,7 @@ Notes:
 
 - Doesn't require servers!
 - Requires <u>Determinism</u> and <u>Snapshot & Restore</u>
-- Gameplay code doesn't mix with network code.
+- Gameplay code is cleanly separate from network code
 
 Notes:
 
@@ -283,7 +283,7 @@ Notes:
 
 ---
 
-<!-- .slide: data-timing="10" -->
+<!-- .slide: data-timing="30" -->
 
 ### A Deterministic Box
 
@@ -302,7 +302,7 @@ Notes:
 
 ---
 
-<!-- .slide: data-timing="10" -->
+<!-- .slide: data-timing="30" -->
 
 ### Bone ECS: First Pass
 
@@ -328,7 +328,7 @@ Notes:
 
 ---
 
-<!-- .slide: data-timing="10" -->
+<!-- .slide: data-timing="30" -->
 
 ### Bevy + Bones
 
@@ -352,6 +352,8 @@ Notes:
 
 ---
 
+<!-- .slide: data-timing="30" -->
+
 ### Problems With Bevy + Bones
 
 <div style="font-size: 0.9em">
@@ -370,6 +372,8 @@ Notes:
 - And the bones world couldn't render UI, because all the UI was in the outer Bevy shell.
 
 ---
+
+<!-- .slide: data-timing="30" -->
 
 ### Bones Framework
 
@@ -399,6 +403,8 @@ Notes:
 
 ---
 
+<!-- .slide: data-timing="30" -->
+
 ### Bones Asset Server
 
 <div style="font-size: 0.8em">
@@ -421,20 +427,127 @@ Notes:
   wherever we needed it.
 - The derive setup, though, had some rough edges and with our own asset server, we could make it
   really seamless.
-- We could also add first-class support for asset and mod packs.
+- We could also add first-class support for user-installed asset and mod packs.
 
 ---
 
-### Bones Asset Server
+<!-- .slide: data-timing="30" -->
+
+### Runtime Defined Types
 
 <div style="font-size: 0.8em">
 
-- Assets are either `Metadata` assets or `Custom` assets
-- `Metadata` assets:
-  - are loaded from YAML files
-  - can reference other assets in a hierarchy
-  - are automatically deserialized into Rust structs
+- Different asset types have different extensions
+  - `.weapon.yaml`
+  - `.map.yaml`
+- Metadata assets are <span style="color: #22D491">validated</span> when loaded
+  - A `blunderbass.weapon.yaml` must match the `weapon` schema
+- Mods can define _new_ schemas
 
 </div>
 
 Notes:
+
+- The new metadata asset deserialization took more thought than I anticipated, though.
+- The reason was that I wanted to be able to deserialize runtime-defined types.
+- For example, when the asset server loads `blunderbass.weapon.yaml`, it makes sure that the YAML file matches the `weapon` schema.
+- When you write Rust, this weapon schema would be derived from the Rust struct.
+- If you write a scripted mod, though, it may need to load assets that have never been defined in Rust.
+- There has to be a way for mods to define their own schemas for assets.
+
+---
+
+<!-- .slide: data-timing="30" -->
+
+### Bones Schema
+
+<div style="font-size: 0.7em">
+
+- Very similar in purpose to Bevy Reflect
+- Designed specifically to support scripting
+- Describes a <span style="color: #22D491">stable memory layout</span>
+  - Unlike Bevy Reflect
+  - Built on `#[repr(C)]`
+- Rust structs can derive `HasSchema`
+- Used by the asset server for metadata assets
+- Used by the ECS for all component storage
+  - Enables storing runtime defined types
+
+</div>
+
+Notes:
+
+- Interestingly, this is the _same_ thing that we needed for scripting.
+- The more I thought about it, the more I realized that the asset server, our scripting solution, and even the Bones ECS itself, all needed the same thing:
+- a way to describe the layout of data.
+- This spawned the development of the Bones Schema crate.
+- Bones Schema is very similar in purpose to Bevy Reflect, but it is implemented very differently.
+- Instead of using trait objects, like Bevy reflect, we use `Schema`s to describe a C memory layout.
+- By adding a `#[repr(C)]` annotation to a Rust struct and deriving `HasSchema`, you get a description of the Rust type's exact memory layout.
+- This can be used by the asset server to deserialize assets that match our Rust structs.
+- It can also be used by scripting implementations, allowing them to read and modify the data in the Rust types.
+- Finally, it worked very elegantly into the design of Bones ECS, allowing it to store anything that has a `Schema`,
+- even if that schema was registered at runtime, by a language other than Rust.
+
+---
+
+<!-- .slide: data-timing="30" -->
+
+### Migrating to the Bones Framework
+
+<div style="font-size: 1em">
+
+- Finished Bones Schema
+- Integrated it with the Bones ECS
+- Finish the Bones asset server
+- Move reusable pieces of Jumpy into the Bones Framework
+- Migrate Jumpy to use the Bones Framework
+
+</div>
+
+Notes:
+
+- While Bones Schema is quite simple in concept, there was a lot to figure out, and it was a big task.
+- It took longer than we planned, but we were accomplishing more than we planned, too.
+- We had hoped to finish an asset server, and ended up laying the foundation for scripting at the same time.
+- I was also really happy with how much more elegant the internals of the Bones ECS were, now that
+  it was using Bones Schema to wrap up most of the `unsafe` code.
+- After we finally finished Bones Schema and the Bones asset server, we were ready to start moving pieces of Jumpy into the Bones framework.
+- This was also really nice, because now our other games could start to re-use things that we had developed for Jumpy.
+- Once that was done, we migrated Jumpy completely to the Bones Framework, removing all direct interaction with Bevy.
+- Jumpy was now fully a Bones game, and independent from it's renderer.
+
+---
+
+<!-- .slide: data-timing="60" -->
+
+### Bones Scripting
+
+<div style="font-size: .8em">
+
+- With Bones Schema in place, we were ready for a scripting language
+- We collaborated with `@kyren` and used their Lua VM, `piccolo`
+  - Using `piccolo` requires no `unsafe`
+  - `piccolo` runs in the browser with the `wasm32-unknown-unknown` target
+- Finally we have modding! 🎉
+
+</div>
+
+Notes:
+
+- Now that we had finished migrating Jumpy, we were tantalizingly close to supporting scripting
+- As far as we knew, everything was already in place, other than the scripting language itself
+- After our performance issues with `bevy_mod_js_scripting` we knew that we wanted to use a language that was implemented in pure Rust,
+- so that we could easily target web and native, without having to call out into the browsers JS engine
+- We had already been watching the `piccolo` library, and had gotten in contact with the author `@kyren` who had recently resumed development on it.
+- `@kyren` was _super_ helpful, and worked with us to get the few features we needed in `piccolo` that weren't there yet.
+- After, again, more work than we thought, we were finally able to implement a Jumpy item in Lua, and even hot reload it while the game was running!
+- Personally, this was a huge milestone, as I had been trying and failing to get modding into multiple game engines for years,
+- starting with Godot, then Armory3D, then Bevy, and finally, Bones.
+- Finally it was working!
+- And the beautiful thing about it, is that it was implemented right into the core ECS.
+- Scripts were able to change any `#[repr(C)]` data in the ECS, without us having to explicitly add Lua bindings.
+- While there are still limitations here and there, Lua still has enough power to do things in the game that we haven't even thought of yet.
+- This was really important for me, because I wanted to avoid the issue where modders feel like
+  second-class citizens, and like they have to petition the core developers to get more API access.
+- Now modders and developers could operate on the same world data, without clunky, manually written API bindings.
