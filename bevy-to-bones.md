@@ -275,7 +275,7 @@ Notes:
 - Things like events, `Local` system params, and `GlobalTransforms` couldn't be used.
 - Almost all queries had to be collected into a vector and sorted before we could safely iterate over them, to avoid the non-deterministic iteration order.
 - Finally, you have to attach rollback IDs to entities you want to sync,
-- you have to be careful with how you use hierarchies, 
+- you have to be careful with how you use hierarchies,
 - and storing `Entity`s in components requires implementing an extra `MapEntities` trait.
 - All of these things were really easy to miss, and it was now a looming threat that with every change we made to the game, we could accidentally break determinism.
 - It felt like a new kind of "undefined behavior" to avoid, and in that respect, all the code was now `unsafe`.
@@ -299,3 +299,142 @@ Notes:
 - I started thinking about what it would take to put the Jumpy's core gameplay logic in it's own deterministic "Box".
 - We could make our own simple ECS that we could use, and we could make the whole world `.clone()`-able so that it would be trivial to snapshot and restore.
 - Or better than making our own, we could just find somebody else who did it.
+
+---
+
+<!-- .slide: data-timing="10" -->
+
+### Bone ECS: First Pass
+
+<div style="font-size: 0.7em">
+
+- Start with a fork of Planck ECS
+- Planck component storage is built on `Vec<T>` and bitsets
+- Modify component storage to allow for runtime-defined types
+- Bones ECS is easier to script than Bevy ECS
+
+</div>
+
+Notes:
+
+- We started off by forking Planck ECS, the simplest Rust ECS I could find.
+- Planck used normal Rust vectors for storage, and used bitsets operations to do queries over components.
+- The only one major modification I wanted to make to it was to allow us to store runtime-defined types.
+- This was a step back in the direction of scripting.
+- Because Bones ECS was going to stay small and simple, it would be much easier to implement scripting for.
+- While there was promising progress with `bevy_mod_js_scripting` it was also very complicated, and there were still big questions
+  about how to make certain things work in scripts, especially when it came to interacting with assets.
+- By doing our own scriptable ECS for the gameplay, it would be easier to get the modding experience we were looking for.
+
+---
+
+<!-- .slide: data-timing="10" -->
+
+### Bevy + Bones
+
+<div>
+  <img src="./bones-in-bevy.excalidraw.png" style="max-width: 80%" />
+</div>
+
+Notes:
+
+- After finishing the first draft of the Bones ECS, we started porting the core Jumpy gameplay to use it instead of the Bevy ECS.
+- This was a big-ish rewrite, and there was a lot more boilerplate than I imagined to get input and rendering types made for Bones.
+- We also had to postpone proper asset handling, and a temporary, annoying integration with Bevy's asset server was used to get things rolling.
+- The good news was that porting was straight-forward, if tedious.
+- By the time we finished, we had a rather interesting architecture.
+- When you started a match, it would create a new Bones world, initialize the game, and then start sending input to it.
+- We created a bevy system that would render whatever sprites and tilemaps that it found in the bones world.
+- For network games, GGRS would send the input to the bones world, as well as instruct it to create or restore snapshots when necessary.
+- After a lot of work we finally had a nice and clean architecture, where we didn't have to think constantly about networking.
+- We also got an interesting bonus, the Jumpy match gameplay was now renderer agnostic.
+- Because it was isolated and deterministic, we could have rendered it in Bevy, or macroquad without changing the gameplay at all.
+
+---
+
+### Problems With Bevy + Bones
+
+<div style="font-size: 0.9em">
+
+- Now we have <span style="color: #C6522C">two</span> ECS's to deal with
+- The asset integration is annoying
+- The Bones world can't render UI
+
+</div>
+
+Notes:
+
+- There were still things to be desired, though.
+- Having to deal with two different ECS's and schedulers could be confusing.
+- The asset integration still required annoying conversions between bones and bevy asset paths.
+- And the bones world couldn't render UI, because all the UI was in the outer Bevy shell.
+
+---
+
+### Bones Framework
+
+<div style="font-size: 0.8em">
+
+- Create a new Bones Framework
+- Start moving pieces of Jumpy into Bones
+  - Egui & Widgets
+  - GGRS & Networking
+- Use a multi-`World` pattern to keep core gameplay isolated
+- Make Bevy a supported <span style="color: #22D491">Bones Framework renderer</span>
+- Create a proper Bones asset server
+
+</div>
+
+Notes:
+
+- The next step, was to create a unified Bones Framework.
+- We would start moving pieces of Jumpy into the new framework, such as the Egui widgets and the networking logic.
+- We would use a multi-`World` strategy, so that the menu could be in one Bones world and easily create, start, and stop separate, isolated gameplay worlds.
+- This multi-`World` setup let us keep all the great advantages of having a separate gameplay world, while only needing to learn one ECS.
+- The end result, is that the whole entire game could be made with Bones alone.
+- Then we would use Bevy as a rendering integration.
+- Bones games are renderer agnostic, they take bones-formatted input and create standardized rendering components for sprites, tilemaps, etc.
+- Any renderer that could render sprites, tilemaps, egui, and debug lines, could be integrated as a Bones Framework renderer, but Bevy would be our official renderer.
+- The can of worms in this whole setup was the asset server.
+
+---
+
+### Bones Asset Server
+
+<div style="font-size: 0.8em">
+
+- Assets are either `Metadata` assets or `Custom` assets
+- `Metadata` assets:
+  - are loaded from YAML files
+  - can reference other assets in a hierarchy
+  - are automatically deserialized into Rust structs
+
+</div>
+
+Notes:
+
+- The Bones asset server was going to better facilitate the way we handled assets in Jumpy and Punchy.
+- In order to allow all of our game config to be hot reloaded, and easily organized, we had a system
+  where we could derive a bevy asset loader for Rust structs using `serde`.
+- It would automatically deserialize Bevy handles from relative paths to other assets, and it made
+  it very nice for loading lots of assets in a hierarchy, with extra metadata in the YAMl files
+  wherever we needed it.
+- The derive setup, though, had some rough edges and with our own asset server, we could make it
+  really seamless.
+- We could also add first-class support for asset and mod packs.
+
+---
+
+### Bones Asset Server
+
+<div style="font-size: 0.8em">
+
+- Assets are either `Metadata` assets or `Custom` assets
+- `Metadata` assets:
+  - are loaded from YAML files
+  - can reference other assets in a hierarchy
+  - are automatically deserialized into Rust structs
+
+</div>
+
+Notes:
