@@ -207,7 +207,7 @@ Notes:
 
 - Doesn't require servers!
 - Requires <u>Determinism</u> and <u>Snapshot & Restore</u>
-- Gameplay code doesn't change or mix with network code.
+- Gameplay code doesn't mix with network code.
 
 Notes:
 
@@ -224,7 +224,32 @@ Notes:
 
 ---
 
-<!-- .slide: data-timing="30" -->
+<!-- .slide: data-timing="30" data-auto-animate -->
+
+### Bevy GGRS
+
+<div style="font-size: 0.8em">
+
+- Might run up to <span style="color: #C6522C">8</span> game updates in a single frame
+- Each game update must finish in less than <span style="color: #C6522C">2ms</span>
+- `bevy_mod_js_scripting` was not fast enough on web
+- No more scripting for now.
+
+</div>
+
+Notes:
+
+- We started using Bevy GGRS for Jumpy, and we were very happy with how it simplified the game code.
+- Unfortunately we ran into a performance problem with our scripting solution.
+- Since GGRS has to do rollbacks and fast-forwards depending on network conditions, it may run the game update up to 8 times in a single render frame.
+- This means that our game update, if we are targeting 60 frames-per-second, has to finish within 2 milliseconds!
+- Unfortunately, we found out that the `bevy_mod_js_scripting` plugin had too much overhead on web, even though it worked fine on native.
+- It's just not very fast to make calls out of WASM into the browser.
+- So for now, we decided to just remove scripting and look more into it later.
+
+---
+
+<!-- .slide: data-auto-animate data-timing="30" -->
 
 ### Bevy GGRS
 
@@ -243,16 +268,17 @@ Notes:
 
 Notes:
 
-- We started using Bevy GGRS for Jumpy, and we were very happy with how it simplified the game code.
-- Unfortunately, we ran into some big issues.
+- As we continued to use Bevy GGRS, we ran into quite a few gotchas.
 - Bevy's design is very focused on performance, and that, in most cases, comes at the expense of determinism.
-- Not much of Bevy is deterministic, and even less of it lends itself to snapshot and restore.
+- On top of that, very little in Bevy lends itself to snapshot and restore.
 - This meant that there were a lot of Bevy features we either couldn't use, or had to be extra careful with.
 - Things like events, `Local` system params, and `GlobalTransforms` couldn't be used.
 - Almost all queries had to be collected into a vector and sorted before we could safely iterate over them, to avoid the non-deterministic iteration order.
-- Finally, you have to attack rollback IDs to entities you want to sync, you have to be careful with how you use hierarchies, and storing `Entity`s in components requires implementing an extra `MapEntities` trait for that component.
+- Finally, you have to attach rollback IDs to entities you want to sync,
+- you have to be careful with how you use hierarchies, 
+- and storing `Entity`s in components requires implementing an extra `MapEntities` trait.
 - All of these things were really easy to miss, and it was now a looming threat that with every change we made to the game, we could accidentally break determinism.
-- It felt like a new kind of "undefined behavior" to avoid, and for that matter, all the code was now `unsafe`.
+- It felt like a new kind of "undefined behavior" to avoid, and in that respect, all the code was now `unsafe`.
 - These issues weren't GGRS's fault, there were just no good ways get deterministic snapshot restore in Bevy.
 
 ---
@@ -261,11 +287,12 @@ Notes:
 
 ### A Deterministic Box
 
-A _tiny_, deterministic ECS
+A _tiny_ ECS
 
 With a `World` that you can `.clone()`
 
 Notes:
+
 - This led to a good deal of thinking about possible solutions.
 - We could re-consider client-server, but it felt like we'd still have a similar feeling of "undefined behavior" by having to do network-specific handling
   all throughout our gameplay code again.
