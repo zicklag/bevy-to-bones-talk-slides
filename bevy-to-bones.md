@@ -414,6 +414,9 @@ Notes:
   - are loaded from YAML files
   - can reference other assets in a hierarchy
   - are automatically deserialized into Rust structs
+- Custom asset server would enable:
+  - User-installed asset packs
+  - Network mod synchronization
 
 </div>
 
@@ -427,7 +430,7 @@ Notes:
   wherever we needed it.
 - The derive setup, though, had some rough edges and with our own asset server, we could make it
   really seamless.
-- We could also add first-class support for user-installed asset and mod packs.
+- We could also add first-class support for user-installed asset and mod packs, and network mod synchronization.
 
 ---
 
@@ -533,7 +536,7 @@ Notes:
 
 </div>
 
-Notes:
+Note:
 
 - Now that we had finished migrating Jumpy, we were tantalizingly close to supporting scripting
 - As far as we knew, everything was already in place, other than the scripting language itself
@@ -551,3 +554,68 @@ Notes:
 - This was really important for me, because I wanted to avoid the issue where modders feel like
   second-class citizens, and like they have to petition the core developers to get more API access.
 - Now modders and developers could operate on the same world data, without clunky, manually written API bindings.
+
+---
+
+<!-- .slide: data-timing="60" -->
+
+### Jumpy & Bones Today
+
+<div style="font-size: .8em">
+
+- Bones continues to prove it's worth
+- Jumpy currently uses Bevy for rendering
+- We are considering writing our own renderer using WGPU
+  - Removes a large number of dependencies from Bevy
+  - Cleans up our rendering integration
+
+</div>
+
+Notes:
+
+- And that brings us to today
+- Bones continues to prove its worth as we keep developing and improving Jumpy.
+- Growing the game functionality has been a pleasant experience, and it hasn't been hard to add new
+  features.
+- Jumpy still uses Bevy as it's renderer, but we are considering writing our own renderer, too.
+- Jumpy's rendering needs are very simple: we've got sprites, tilemaps, egui, and debug lines,
+  that's it.
+- Right now, though, we are pulling in a chunk of Bevy code like Bevy Reflect, the Bevy ECS, and the
+  Bevy renderer, that is much larger than it needs to be for our use-case.
+- This affects compile times, which, while not the most important thing in the world, is impacting contributors.
+- Also, Bevy's ECS-driven rendering strategy is not very nice to work with when we are trying to
+  render things from another ECS.
+- We currently have a good way to inject our sprites into Bevy's render extract phase, but a recent
+  update in Bevy ruined that, so we haven't updated beyond Bevy `0.11`.
+- We end up either having to write our own sprite renderer for Bevy that will read from our ECS, or
+  we have to synchronize entities, which is not very efficient and is annoying and tricky.
+- This means it might be cleanest for us just to make our own renderer, save on unnecessary
+  dependencies, and avoid duplicating Bevy's sprite renderer or synchronizing entities.
+
+---
+
+<!-- .slide: data-timing="60" -->
+
+### Bones 🤝 Bevy
+
+<div style="font-size: .7em">
+
+- We never meant to make a game engine
+- We never could have done it without Bevy
+- It enabled us to explore and branch out, while <span style="color: #22D491">still working on our game</span>
+- Bevy allowed us to replace different pieces of it one-by-one
+- Bones has learned <span style="color: #C6522C;">so much</span> from Bevy
+
+</div>
+
+Notes:
+- So, we never meant to make a game engine.
+- Our goal was to make we needed for networking and modding, in a way that we could share it with all our Rust games.
+- It turned out that what we needed, hadn't been made yet, and by building it step-by-step, we were
+  able to make what we needed, even while still working on our game!
+- This would not have been possible without Bevy.
+- Bevy's modular design allowed us to replace pieces of it while keeping other pieces that we still needed.
+- Bevy also inspired many parts of bones; we learned a lot from it, and we still follow Bevy's
+  journey and learn from Bevy discussions and development.
+- While we may not continue to use Bevy, if we make our own renderer, Bones will forever be in Bevy's debt,
+  and never would have existed without it.
