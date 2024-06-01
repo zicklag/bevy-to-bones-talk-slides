@@ -15,7 +15,7 @@ code {
 
 ### From Bevy to Bones
 
-<!-- .slide: data-timing="10" -->
+<!-- .slide: data-timing="8" -->
 
 **"Accidentally" Making a Game Engine**
 
@@ -27,7 +27,7 @@ Notes:
 
 ---
 
-<!-- .slide: data-auto-animate data-timing="5" -->
+<!-- .slide: data-auto-animate data-timing="8" -->
 
 Isn't This a _Bevy_ Meetup?
 
@@ -39,7 +39,7 @@ Notes:
 
 ---
 
-<!-- .slide: data-auto-animate data-timing="10" -->
+<!-- .slide: data-auto-animate data-timing="8" -->
 
 Isn't This a _Bevy_ Meetup?
 
@@ -83,7 +83,7 @@ Notes:
 
 ### Rewriting Jumpy In Bevy
 
-<!-- .slide: data-timing="8" -->
+<!-- .slide: data-timing="10" -->
 
 <ul>
     <li>Jumpy was using <a href="https://macroquad.rs/" target="_blank">Macroquad</a></li>
@@ -99,7 +99,7 @@ Notes:
 
 ### Advantages to Bevy
 
-<!-- .slide: data-timing="30" -->
+<!-- .slide: data-timing="25" -->
 
 - Large community
 - Good cross-platform support
@@ -111,18 +111,18 @@ Notes:
 
 - That led us to consider rewriting Jumpy in Bevy.
 - There were some compelling advantages.
-- For one, Bevy head a large and growing community, which had already shown a lot of ability to get things done
-- It had good cross-platform and rendering support, and
-<!-- - While I'm not the most experienced with Macroquad, when I started work on Jumpy, the developer before me was writing a new renderer to overcome limitations in Macroquad, so switching to Bevy seemed preferable to maintaining our own renderer. -->
-- we already had investments in Bevy.
-- For Punchy, I had created a nest YAML asset loading system, so we could hot reload all of our config.
-- Most importantly, Bevy had up-and-coming scripting support. This was through the `bevy_mod_js_scripting` plugin, which I had just finished contributing to in order to get web support, and we had a working proof-of-concept already in Punchy.
+- For one, Bevy had a large and growing community, which had already shown a lot of ability to get
+  things done
+- It had good cross-platform and rendering support, and we would be able to re-use some of the Bevy
+  stuff that we had made for Punchy.
+- A particularly appealing thought was that we would be able to use the new `bevy_mod_js_scripting`
+  plugin that I had recently integrated with Punchy, too.
 
 ---
 
 ### Start Working! 👨‍🔧
 
-<!-- .slide: data-timing="15" -->
+<!-- .slide: data-timing="20" -->
 
 <div style="display: flex; justify-content: center; align-items: center;">
     <img src="./fishfolk-logo.png" style="width: 10" />
@@ -149,7 +149,7 @@ Notes:
 
 ---
 
-<!-- .slide: data-auto-animate data-timing="10" data-background-image="networking-cc0-upscaled.png" data-background-opacity="0.85" data-background-transition="zoom" -->
+<!-- .slide: data-auto-animate data-timing="2" data-background-image="networking-cc0-upscaled.png" data-background-opacity="0.85" data-background-transition="zoom" -->
 
 <h2><span style="background-color: hsla(0, 0%, 8%, 0.95); padding: 0.2em 0.3em; border-radius: 0.2em;">Networking</span></h3>
 
@@ -159,7 +159,7 @@ Notes:
 
 ---
 
-<!-- .slide: data-auto-animate data-timing="10" -->
+<!-- .slide: data-auto-animate data-timing="18" -->
 
 <h2 style="position: relative; top: -1em">Networking</h2>
 <div style="position: relative; top: -2em; font-size: 0.9em">
@@ -179,7 +179,7 @@ Notes:
 
 ---
 
-<!-- .slide: data-timing="1" -->
+<!-- .slide: data-timing="45" -->
 
 <h2 style="position: relative; top: -1em">Networking</h2>
 <div style="position: relative; top: -2em; font-size: 0.9em">
@@ -198,7 +198,7 @@ Notes:
 
 ---
 
-<!-- .slide: data-timing="30" -->
+<!-- .slide: data-timing="36" -->
 
 <h2 style="position: relative; top: -1em">Networking</h2>
 <div style="position: relative; top: -2em; font-size: 0.9em">
@@ -249,7 +249,7 @@ Notes:
 
 ---
 
-<!-- .slide: data-auto-animate data-timing="30" -->
+<!-- .slide: data-auto-animate data-timing="64" -->
 
 ### Bevy GGRS
 
@@ -294,7 +294,7 @@ With a `World` that you can `.clone()`
 Notes:
 
 - This led to a good deal of thinking about possible solutions.
-- We could re-consider client-server, but it felt like we'd still have a similar feeling of "undefined behavior" by having to do network-specific handling
+- We could re-consider client-server, but it seemed like we'd still have a similar feeling of "undefined behavior" by having to do network-specific handling
   all throughout our gameplay code again.
 - I started thinking about what it would take to put the Jumpy's core gameplay logic in it's own deterministic "Box".
 - We could make our own simple ECS that we could use, and we could make the whole world `.clone()`-able so that it would be trivial to snapshot and restore.
@@ -302,7 +302,7 @@ Notes:
 
 ---
 
-<!-- .slide: data-timing="30" -->
+<!-- .slide: data-timing="41" -->
 
 ### Bone ECS: First Pass
 
@@ -328,7 +328,7 @@ Notes:
 
 ---
 
-<!-- .slide: data-timing="30" -->
+<!-- .slide: data-timing="64" -->
 
 ### Bevy + Bones
 
@@ -352,7 +352,7 @@ Notes:
 
 ---
 
-<!-- .slide: data-timing="30" -->
+<!-- .slide: data-timing="16" -->
 
 ### Problems With Bevy + Bones
 
@@ -373,7 +373,7 @@ Notes:
 
 ---
 
-<!-- .slide: data-timing="30" -->
+<!-- .slide: data-timing="47" -->
 
 ### Bones Framework
 
@@ -393,17 +393,17 @@ Notes:
 
 - The next step, was to create a unified Bones Framework.
 - We would start moving pieces of Jumpy into the new framework, such as the Egui widgets and the networking logic.
-- We would use a multi-`World` strategy, so that the menu could be in one Bones world and easily create, start, and stop separate, isolated gameplay worlds.
+- We would use a multi-`World` strategy, so that you could have one bones world for the menu that would create separate, isolated gameplay worlds for the matches.
 - This multi-`World` setup let us keep all the great advantages of having a separate gameplay world, while only needing to learn one ECS.
 - The end result, is that the whole entire game could be made with Bones alone.
 - Then we would use Bevy as a rendering integration.
-- Bones games are renderer agnostic, they take bones-formatted input and create standardized rendering components for sprites, tilemaps, etc.
-- Any renderer that could render sprites, tilemaps, egui, and debug lines, could be integrated as a Bones Framework renderer, but Bevy would be our official renderer.
+- Bones games are renderer agnostic, they take bones-formatted input and create standardized rendering components.
+- Any renderer that could render sprites, tilemaps, egui, and debug lines, could be integrated as a renderer, but Bevy would be our official renderer.
 - The can of worms in this whole setup was the asset server.
 
 ---
 
-<!-- .slide: data-timing="30" -->
+<!-- .slide: data-timing="35" -->
 
 ### Bones Asset Server
 
@@ -422,19 +422,19 @@ Notes:
 
 Notes:
 
-- The Bones asset server was going to better facilitate the way we handled assets in Jumpy and Punchy.
-- In order to allow all of our game config to be hot reloaded, and easily organized, we had a system
-  where we could derive a bevy asset loader for Rust structs using `serde`.
-- It would automatically deserialize Bevy handles from relative paths to other assets, and it made
-  it very nice for loading lots of assets in a hierarchy, with extra metadata in the YAMl files
-  wherever we needed it.
-- The derive setup, though, had some rough edges and with our own asset server, we could make it
+- The Bones asset server was going to better facilitate the way we handled assets in Jumpy.
+- In Jumpy, we have a concept of metadata assets.
+- These assets are loaded from YAMl files and deserialized into Rust structs.
+- Metadata assets contain all of our game config, and can reference other assets to build an asset hierarchy.
+- In Bevy we had a custom derive macro that could be used to automatically generate asset loaders
+  from our Rust structs.
+- This derive setup, though, had some rough edges and with our own asset server, we could make it
   really seamless.
-- We could also add first-class support for user-installed asset and mod packs, and network mod synchronization.
+- We could also add first-class support for user-installed asset and mod packs.
 
 ---
 
-<!-- .slide: data-timing="30" -->
+<!-- .slide: data-timing="33" -->
 
 ### Runtime Defined Types
 
@@ -460,7 +460,7 @@ Notes:
 
 ---
 
-<!-- .slide: data-timing="30" -->
+<!-- .slide: data-timing="58" -->
 
 ### Bones Schema
 
@@ -494,7 +494,7 @@ Notes:
 
 ---
 
-<!-- .slide: data-timing="30" -->
+<!-- .slide: data-timing="47" -->
 
 ### Migrating to the Bones Framework
 
@@ -522,7 +522,7 @@ Notes:
 
 ---
 
-<!-- .slide: data-timing="60" -->
+<!-- .slide: data-timing="66" -->
 
 ### Bones Scripting
 
@@ -538,21 +538,17 @@ Notes:
 
 Note:
 
-- Now that we had finished migrating Jumpy, we were tantalizingly close to supporting scripting
-- As far as we knew, everything was already in place, other than the scripting language itself
-- After our performance issues with `bevy_mod_js_scripting` we knew that we wanted to use a language that was implemented in pure Rust,
-- so that we could easily target web and native, without having to call out into the browsers JS engine
-- We had already been watching the `piccolo` library, and had gotten in contact with the author `@kyren` who had recently resumed development on it.
-- `@kyren` was _super_ helpful, and worked with us to get the few features we needed in `piccolo` that weren't there yet.
+- Now that we had finished migrating Jumpy, we were tantalizingly close to supporting scripting.
+- As far as we knew, everything was already in place, other than the scripting language itself.
+- We decided on `piccolo` , a Lua implementation written in pure Rust.
+- It had big plusses in that it could be used with without any `unsafe`, and it could target web with the `wasm32` target.
+- `@kyren`, the author of `piccolo` was _super_ helpful, and worked with us to get the few features we needed in `piccolo` that weren't there yet.
 - After, again, more work than we thought, we were finally able to implement a Jumpy item in Lua, and even hot reload it while the game was running!
 - Personally, this was a huge milestone, as I had been trying and failing to get modding into multiple game engines for years,
 - starting with Godot, then Armory3D, then Bevy, and finally, Bones.
 - Finally it was working!
 - And the beautiful thing about it, is that it was implemented right into the core ECS.
 - Scripts were able to change any `#[repr(C)]` data in the ECS, without us having to explicitly add Lua bindings.
-- While there are still limitations here and there, Lua still has enough power to do things in the game that we haven't even thought of yet.
-- This was really important for me, because I wanted to avoid the issue where modders feel like
-  second-class citizens, and like they have to petition the core developers to get more API access.
 - Now modders and developers could operate on the same world data, without clunky, manually written API bindings.
 
 ---
@@ -575,8 +571,6 @@ Notes:
 
 - And that brings us to today
 - Bones continues to prove its worth as we keep developing and improving Jumpy.
-- Growing the game functionality has been a pleasant experience, and it hasn't been hard to add new
-  features.
 - Jumpy still uses Bevy as it's renderer, but we are considering writing our own renderer, too.
 - Jumpy's rendering needs are very simple: we've got sprites, tilemaps, egui, and debug lines,
   that's it.
@@ -587,14 +581,13 @@ Notes:
   render things from another ECS.
 - We currently have a good way to inject our sprites into Bevy's render extract phase, but a recent
   update in Bevy ruined that, so we haven't updated beyond Bevy `0.11`.
-- We end up either having to write our own sprite renderer for Bevy that will read from our ECS, or
+- We end up either having to write our own sprite renderer for Bevy, or
   we have to synchronize entities, which is not very efficient and is annoying and tricky.
-- This means it might be cleanest for us just to make our own renderer, save on unnecessary
-  dependencies, and avoid duplicating Bevy's sprite renderer or synchronizing entities.
+- This means it might be cleanest for us just to make our own renderer.
 
 ---
 
-<!-- .slide: data-timing="60" -->
+<!-- .slide: data-timing="42" -->
 
 ### Bones 🤝 Bevy
 
@@ -609,6 +602,7 @@ Notes:
 </div>
 
 Notes:
+
 - So, we never meant to make a game engine.
 - Our goal was to make we needed for networking and modding, in a way that we could share it with all our Rust games.
 - It turned out that what we needed, hadn't been made yet, and by building it step-by-step, we were
