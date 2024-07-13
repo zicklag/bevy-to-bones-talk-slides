@@ -11,6 +11,20 @@ code {
     font-size: 0.8em;
     color: #C98BFF;
 }
+code::-webkit-scrollbar {
+    width: 10px;
+}
+
+code::-webkit-scrollbar-track {
+    border-radius: 8px;
+    background-color: #e7e7e7;
+    border: 1px solid #cacaca;
+}
+
+code::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    background-color: #D657DC;
+}
 </style>
 
 ### From Bevy to Bones
@@ -116,7 +130,7 @@ Notes:
 - It had good cross-platform and rendering support, and we would be able to re-use some of the Bevy
   stuff that we had made for Punchy.
 - A particularly appealing thought was that we would be able to use the new `bevy_mod_js_scripting`
-  plugin that I had recently integrated with Punchy, too.
+  plugin that I had recently integrated with Punchy.
 
 ---
 
@@ -613,3 +627,457 @@ Notes:
   journey and learn from Bevy discussions and development.
 - While we may not continue to use Bevy, if we make our own renderer, Bones will forever be in Bevy's debt,
   and never would have existed without it.
+
+---
+
+<!-- .slide: data-auto-animate data-auto-animate-id="simple" data-timing="42" -->
+
+### A Simple Schema
+
+<pre><code data-line-numbers="|4-7|3|10-11" data-trim>
+use bones_schema::prelude::*;
+
+#[derive(HasSchema, Clone, Default)]
+struct Position {
+    x: f32,
+    y: f32,
+}
+
+fn main() {
+  let schema = Position::schema();
+  dbg!(schema);
+}
+</code></pre>
+
+Note:
+
+This is a thing. ⏭️
+
+---
+
+<!-- .slide: data-auto-animate data-auto-animate-id="simple" data-timing="42" -->
+
+### A Simple Schema
+
+<pre style="font-size: 0.6em"><code data-line-numbers="|6-7|8-13" data-trim>
+[src/main.rs:11:5] schema = Schema {
+    id: SchemaId {
+        id: 0,
+    },
+    data: SchemaData {
+        name: u!("Position"),
+        full_name: u!("bones_schema_test::Position"),
+        kind: Primitive(
+            Opaque {
+                size: 8,
+                align: 4,
+            },
+        ),
+        type_data: TypeDatas(
+            [],
+        ),
+        type_id: Some(
+            TypeId {
+                t: (
+                    15945696820052270695,
+                    11636597896589064102,
+                ),
+            },
+        ),
+        ..
+    },
+    layout: Layout {
+        size: 8,
+        align: 4 (1 << 2),
+    },
+    field_offsets: [],
+}
+</code></pre>
+
+Note:
+
+This is a thing. ⏭️
+
+---
+
+<!-- .slide: data-auto-animate data-auto-animate-id="reprc" data-timing="42" -->
+
+### `#[repr(C)]` Schema
+
+<pre ><code data-line-numbers="|4" data-trim>
+use bones_schema::prelude::*;
+
+#[derive(HasSchema, Clone, Default)]
+#[repr(C)] // <----
+struct Position {
+    x: f32,
+    y: f32,
+}
+
+fn main() {
+  let schema = Position::schema();
+  dbg!(schema);
+}
+</code></pre>
+
+Note:
+
+This is a thing. ⏭️
+
+---
+
+<!-- .slide: data-auto-animate data-auto-animate-id="reprc" data-timing="42" -->
+
+### `#[repr(C)]` Schema
+
+<pre><code data-line-numbers="8|10|12-14|15|22-24" data-trim>
+[src/main.rs:12:5] schema = Schema {
+    id: SchemaId {
+        id: 1,
+    },
+    data: SchemaData {
+        name: u!("Position"),
+        full_name: u!("bones_schema_test::Position"),
+        kind: Struct(
+            StructSchemaInfo {
+                fields: [
+                    StructFieldInfo {
+                        name: Some(
+                            u!("x"),
+                        ),
+                        schema: Schema {
+                            id: SchemaId {
+                                id: 0,
+                            },
+                            data: SchemaData {
+                                name: u!("f32"),
+                                full_name: u!("std::f32"),
+                                kind: Primitive(
+                                    F32,
+                                ),
+                                type_data: TypeDatas(
+                                    [],
+                                ),
+                                type_id: Some(
+                                    TypeId {
+                                        t: (
+                                            472265404662890772,
+                                            9774757227469882430,
+                                        ),
+                                    },
+                                ),
+                                ..
+                            },
+                            layout: Layout {
+                                size: 4,
+                                align: 4 (1 << 2),
+                            },
+                            field_offsets: [],
+                        },
+                    },
+                    StructFieldInfo {
+                        name: Some(
+                            u!("y"),
+                        ),
+                        schema: Schema {
+                            id: SchemaId {
+                                id: 0,
+                            },
+                            data: SchemaData {
+                                name: u!("f32"),
+                                full_name: u!("std::f32"),
+                                kind: Primitive(
+                                    F32,
+                                ),
+                                type_data: TypeDatas(
+                                    [],
+                                ),
+                                type_id: Some(
+                                    TypeId {
+                                        t: (
+                                            472265404662890772,
+                                            9774757227469882430,
+                                        ),
+                                    },
+                                ),
+                                ..
+                            },
+                            layout: Layout {
+                                size: 4,
+                                align: 4 (1 << 2),
+                            },
+                            field_offsets: [],
+                        },
+                    },
+                ],
+            },
+        ),
+        type_data: TypeDatas(
+            [],
+        ),
+        type_id: Some(
+            TypeId {
+                t: (
+                    16884739941262504889,
+                    10590392532827682936,
+                ),
+            },
+        ),
+        ..
+    },
+    layout: Layout {
+        size: 8,
+        align: 4 (1 << 2),
+    },
+    field_offsets: [
+        (
+            Some(
+                "x",
+            ),
+            0,
+        ),
+        (
+            Some(
+                "y",
+            ),
+            4,
+        ),
+    ],
+}
+</code></pre>
+
+Note:
+
+This is a thing. ⏭️
+
+---
+
+<!-- .slide: data-timing="42" -->
+
+### `SchemaBox` for Type Erasure
+
+<pre style="font-size: 0.5em"><code data-line-numbers="3-16|19-26|28|30|31-32" data-noescape data-trim>
+use bones_schema::prelude::*;
+
+#[derive(HasSchema, Clone, Default)]
+#[repr(C)]
+struct Position {
+    x: f32,
+    y: f32,
+}
+
+#[derive(HasSchema, Clone, Default)]
+#[repr(C)]
+struct Velocity {
+    x: f32,
+    y: f32,
+    angular: f32,
+}
+
+fn main() {
+    let pos = Position { x: 10.0, y: 5.0 };
+    let vel = Velocity {
+        x: 2.0,
+        y: 4.0,
+        angular: 0.0,
+    };
+    let pos_box = SchemaBox::new(pos);
+    let vel_box = SchemaBox::new(vel);
+
+    let boxes = vec![pos_box, vel_box];
+
+    for b in &boxes {
+        if let Ok(pos) = b.try_cast_ref::&lt;Position&gt;() {
+            dbg!(pos.x, pos.y);
+        } else if let Ok(vel) = b.try_cast_ref::&lt;Velocity&gt;() {
+            dbg!(vel.x, vel.y, vel.angular);
+        }
+    }
+}
+</code></pre>
+
+---
+
+<!-- .slide: data-timing="42" -->
+
+### `SchemaBox` for For Runtime Field Access
+
+<pre style="font-size: 0.5em"><code data-line-numbers="30|31|32|33|34|35-39" data-noescape data-trim>
+use bones_schema::prelude::*;
+
+#[derive(HasSchema, Clone, Default)]
+#[repr(C)]
+struct Position {
+    x: f32,
+    y: f32,
+}
+
+#[derive(HasSchema, Clone, Default)]
+#[repr(C)]
+struct Velocity {
+    x: f32,
+    y: f32,
+    angular: f32,
+}
+
+fn main() {
+    let pos = Position { x: 10.0, y: 5.0 };
+    let vel = Velocity {
+        x: 2.0,
+        y: 4.0,
+        angular: 0.0,
+    };
+    let pos_box = SchemaBox::new(pos);
+    let vel_box = SchemaBox::new(vel);
+
+    let boxes = vec![pos_box, vel_box];
+
+    for my_box in &boxes {
+        let my_ref: SchemaRef = my_box.as_ref();
+        let x: &f32 = my_ref
+            .field("x").unwrap()
+            .try_cast().unwrap();
+        dbg!(x);
+    }
+
+    // [src/main.rs:33:9] x = 10.0
+    // [src/main.rs:33:9] x = 2.0
+}
+</code></pre>
+
+---
+
+<!-- .slide: data-timing="42" -->
+
+### `SchemaBox` for Deserializing
+
+<pre style="font-size: 0.55em"><code data-line-numbers="19-22|25|26|27-28|29|31-33" data-noescape data-trim>
+use bones_schema::prelude::*;
+use serde::de::DeserializeSeed;
+
+#[derive(HasSchema, Clone, Default)]
+#[repr(C)]
+struct Position {
+    x: f32,
+    y: f32,
+}
+
+#[derive(HasSchema, Clone, Default)]
+#[repr(C)]
+struct Velocity {
+    x: f32,
+    y: f32,
+    angular: f32,
+}
+
+static MY_POS: &str = r#"
+x: 10
+y: 5.5   
+"#;
+
+fn main() {
+    let yaml_deserializer = serde_yaml::Deserializer::from_str(MY_POS);
+    let pos_box: SchemaBox = SchemaDeserializer(Position::schema())
+        .deserialize(yaml_deserializer)
+        .unwrap();
+    let pos: Position = pos_box.try_cast_into().unwrap();
+
+    dbg!(pos.x, pos.y);
+    // [src/main.rs:30:5] pos.x = 10.0
+    // [src/main.rs:30:5] pos.y = 5.5
+}
+</code></pre>
+
+---
+
+<!-- .slide: data-timing="42" -->
+
+### `SchemaBox` for Runtime Defined Types
+
+<div style="font-size: 0.8em">
+
+- `Schema`s can be derived, but they can also be loaded from files at **runtime**.
+- All of the `Schema` features work for runtime-loaded schemas:
+  - Schema boxes
+  - Runtime field access
+  - Deserialization
+- Scripts & Bones ECS can access all the `#[repr(C)]` data regardless of it's source.
+
+</div>
+
+---
+
+<!-- .slide: data-timing="42" -->
+
+### Associated Type Data
+
+<pre style="font-size: 0.55em"><code data-line-numbers="3-8|10-16|18-23|20|21|25-32|46|47|48|49|51-57" data-noescape data-trim>
+use bones_schema::prelude::*;
+
+#[derive(HasSchema, Clone, Default, Debug)]
+enum StorageMode {
+    #[default]
+    OnDemand,
+    PreAllocate(usize),
+}
+
+#[derive(HasSchema, Clone, Default)]
+#[type_data(StorageMode::OnDemand)] // <----
+#[repr(C)]
+struct Position {
+    x: f32,
+    y: f32,
+}
+
+impl&lt;T&gt; FromType&lt;T&gt; for StorageMode {
+    fn from_type() -> Self {
+        let size = std::mem::size_of::&lt;T&gt;();
+        StorageMode::PreAllocate(1000 / size)
+    }
+}
+
+#[derive(HasSchema, Clone, Default)]
+#[derive_type_data(StorageMode)] // <----
+#[repr(C)]
+struct Velocity {
+    x: f32,
+    y: f32,
+    angular: f32,
+}
+
+fn main() {
+    let pos = Position { x: 10.0, y: 5.0 };
+    let vel = Velocity {
+        x: 2.0,
+        y: 4.0,
+        angular: 0.0,
+    };
+    let pos_box = SchemaBox::new(pos);
+    let vel_box = SchemaBox::new(vel);
+
+    let boxes = vec![pos_box, vel_box];
+
+    for my_box in &boxes {
+        let storage_mode: &StorageMode = my_box
+          .schema()
+          .type_data.get().unwrap();
+
+        dbg!(storage_mode);
+    }
+
+    // [src/main.rs:48:9] storage_mode = OnDemand
+    // [src/main.rs:48:9] storage_mode = PreAllocate(
+    //    83,
+    // )
+}
+</code></pre>
+
+---
+
+### That's All! 👋
+
+<svg height="32" aria-hidden="true" viewBox="0 0 16 16" version="1.1" width="32" data-view-component="true" style="fill: white; transform: scale(2)">
+    <path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"></path>
+</svg>
+
+<https://github.com/fishfolk/bones>
