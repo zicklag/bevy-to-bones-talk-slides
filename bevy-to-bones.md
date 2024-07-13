@@ -630,7 +630,7 @@ Notes:
 
 ---
 
-<!-- .slide: data-auto-animate data-auto-animate-id="simple" data-timing="42" -->
+<!-- .slide: data-auto-animate data-auto-animate-id="simple" data-timing="35" -->
 
 ### A Simple Schema
 
@@ -659,13 +659,13 @@ Note:
 
 - First we're going to peek at the simplest thing you can do, which is derive the `HasSchema` trait on a Rust struct. ⏭️
 - Here we've got a simple `Position` struct with an `x` and a `y` field. ⏭️
-- Here we're just going to derive the `HasSchema`, `Clone`, and `Default` traits.
-- The `HasSchema` trait has one function on it that returns the `Schema` for the implementing type. ⏭️
+- We are just going to derive the `HasSchema`, `Clone`, and `Default` traits.
+- The `HasSchema` trait has one function on it that returns the `Schema` for the implementing type.
 - To see what that looks like, we're going to get our `Position` struct's schema and debug print it. ⏭️
 
 ---
 
-<!-- .slide: data-auto-animate data-auto-animate-id="simple" data-timing="42" -->
+<!-- .slide: data-auto-animate data-auto-animate-id="simple" data-timing="34" -->
 
 ### A Simple Schema
 
@@ -706,7 +706,7 @@ Note:
 
 Note:
 
-- As you can see, 📜 we get a lot of stuff here.
+- As you can see, we get a lot of stuff here.
 - We're going to look at just a couple things for the moment. ⏭️
 - We can see that the schema tells us the short name and the full name of our type, which is very
   handy for debugging, and for figuring out which type to import by name in scripts. ⏭️
@@ -714,12 +714,12 @@ Note:
 - In this case we see that it's an opaque primitive.
 - Since it's opaque all we know about the type is it's size and alignment.
 - That's not very much info, but it's just enough that we can insert the type into, for example, and
-  ECS, as long as we have a pointer to some data with the same size and alignment.
+  ECS.
 - If we want any kind of scripting powers, though, we need more info.
 
 ---
 
-<!-- .slide: data-auto-animate data-auto-animate-id="reprc" data-timing="42" -->
+<!-- .slide: data-auto-animate data-auto-animate-id="reprc" data-timing="10" -->
 
 ### `#[repr(C)]` Schema
 
@@ -747,7 +747,7 @@ Note:
 
 ---
 
-<!-- .slide: data-auto-animate data-auto-animate-id="reprc" data-timing="42" -->
+<!-- .slide: data-auto-animate data-auto-animate-id="reprc" data-timing="15" -->
 
 ### `#[repr(C)]` Schema
 
@@ -873,15 +873,15 @@ Note:
 - The struct info tell us the fields of the struct ⏭️
 - The names of each field ⏭️
 - And the schema of each field ⏭️
-- Finally, by looking at the nested schema of the `x` field, we can see that it is a primitive `f32`.
+- Finally, by looking at the schema of the `x` field, ⏭️ we can see that it is a primitive `f32`.
 - The schema now has enough info for scripts to come in and edit the memory of the struct, without
   triggering undefined behavior.
-- The schema tells us what can be safely done with data that matches the schema.
+- The schema tells us what can be safely done with the data.
 - ⏭️
 
 ---
 
-<!-- .slide: data-timing="42" -->
+<!-- .slide: data-timing="56" -->
 
 ### `SchemaBox` for Type Erasure
 
@@ -928,26 +928,26 @@ fn main() {
 Notes:
 
 - Now we're going to look at what kinds of abilities this gives us in Rust.
-- We'll start by adding another struct, in this case a `Velocity` struct, that also derives `HasSchema`. ⏭️
-- First we create an instance of a Position and a Velocity ⏭️
-- And then we stick them both in their own `SchemaBox`es.
+- We'll start by adding another struct, in this case a `Velocity` struct, that also derives `HasSchema`.
+- ⏭️ First we create an instance of a Position and a Velocity
+- ⏭️ Then we stick them both in their own `SchemaBox`es.
 - The `SchemaBox` is one of the most used types in Bones schema, and is in fact very much like a `Box<dyn Any>`.
 - By putting the position and the velocity in boxes we "erase" the type, so to speak, so that even
   though there are different types on the inside, they are the same type on the outside.
-- This lets us do things like stick both of them inside the same vector, which is impossible
-  normally every item in a vector must be the same type. ⏭️
-- Now we can loop over the items in the vector. ⏭️
-- And attempt to cast it to a specific type, printing the value if the inner data matches the type we are trying to cast to.
+- ⏭️ This lets us do things like stick both of them inside the same vector, which is impossible
+  normally, because every item in a vector must be the same type.
+- ⏭️ Now we can loop over the items in the vector.
+- ⏭️ And attempt to cast it to a specific type, printing the data if the cast succeeds.
 - This is not really any different than what you can already do with a `Box<dyn Any>`, though.
 - Let's get a little deeper. ⏭️
 
 ---
 
-<!-- .slide: data-timing="42" -->
+<!-- .slide: data-timing="44" -->
 
 ### `SchemaBox` for For Runtime Field Access
 
-<pre style="font-size: 0.5em"><code data-line-numbers="30|31|32-34|35-39" data-noescape data-trim>
+<pre style="font-size: 0.5em"><code data-line-numbers="30-36|31|32-34|35-39" data-noescape data-trim>
 use bones_schema::prelude::*;
 
 #[derive(HasSchema, Clone, Default)]
@@ -995,12 +995,12 @@ Notes:
 - Because the schemas of `#[repr(C)]` types describe the fields of the type, we are able to access fields by their names at runtime.
 - Here we have the same example as last time, but we modify the loop ⏭️
 - Instead of trying to cast to a specific Rust type, now we use the `as_ref()` function get a
-  `SchemaRef`, which is simpler to a reference to a `dyn Any` . ⏭️
-- Unlike `dyn Any`, though, we are able to extract fields by name, or index, from the reference. ⏭️
-- We use the field function to try and get a field named `"x"` and then we try to cast it to an f32. ⏭️
-- This lets us print the `x` field of each item in our vector, even though one of them is a
+  `SchemaRef`, which is similar to a reference `dyn Any`. ⏭️
+- Unlike `dyn Any`, though, we are able to extract fields by name, from the reference.
+- We use the field function to try and get a field named `"x"` and then we try to cast it to an f32.
+- ⏭️ This lets us print the `x` field of each item in our vector, even though one of them is a
   `Position` and the other one is a `Velocity`.
-- This kind of ability is essential for scripting, and also very useful for things like world explorers.
+- This kind of ability is essential for scripting, and also very useful for things like ECS world explorers.
 - ⏭️
 
 ---
@@ -1009,7 +1009,7 @@ Notes:
 
 ### `SchemaBox` for Deserializing
 
-<pre style="font-size: 0.55em"><code data-line-numbers="19-22|25|26|27-28|29|31-33" data-noescape data-trim>
+<pre style="font-size: 0.55em"><code data-line-numbers="19-22|25|26-28|29|31-33" data-noescape data-trim>
 use bones_schema::prelude::*;
 use serde::de::DeserializeSeed;
 
@@ -1048,21 +1048,21 @@ fn main() {
 
 Notes:
 
-- Another thing we can use Bones Schema for is serializing and deserializing.
-- For example, if we have this small YAML snippet that we want to deserialize a Position from.
-- We haven't derived the serde Deserialize trait on Position, but we do have all the info we need in the `Schema`. ⏭️
+- We can also use Bones schema for serializing and deserializing.
+- For example, if we have this small YAML snippet that we want to deserialize into a Position.
+- We haven't derived `serde::Deserialize` for `Position`, but we do have all the info we need
+  already in the `Schema`. ⏭️
 - We can create a normal `serde_yaml` Deserializer from our YAML snippet. ⏭️
-- And then create a `SchemaDeserializer` for our `Position` schema. ⏭️
-- Finally we can have the schema deserializer use the yaml deserializer to create a schema box from the data.
-- Since we deserialized using the `Position` schema, we can then cast the `SchemaBox` into a position ⏭️
-- and prove that the YAML data was correctly deserialized.
+- And then create a `SchemaDeserializer` for our `Position` schema, and use it to load the data into a SchemaBox.
+- ⏭️ After we have the box, we can cast it into a `Position`
+- ⏭️ and prove that the YAML data was correctly loaded by printing it.
 - This functionality is extremely useful in the Bones asset server, allowing us to automatically
-  load our metadata assets from YAML.
+  load YAML assets into Rust structs.
 - ⏭️
 
 ---
 
-<!-- .slide: data-timing="42" -->
+<!-- .slide: data-timing="31" -->
 
 ### `Schema` for Runtime Defined Types
 
@@ -1082,14 +1082,14 @@ Note:
 - An important thing to note at this point is that schemas can be derived, but they can also be
   loaded from files at runtime.
 - For example, mods can define their own schemas for types that never existed in Rust.
-- Even still, all of the schema features work the same for runtime loaded schemas.
+- Even still, all of the schema features work the same.
 - You can store the data in schema boxes, or in the bones ECS, you can access fields at runtime, and
-  you can deserialize data using serde.
+  you can deserialize the data using serde.
 - Scripts and the Bones ECS can access all of the `#[repr(C)]` data, regardless of it's source.
 
 ---
 
-<!-- .slide: data-auto-animate data-timing="42" -->
+<!-- .slide: data-auto-animate data-timing="35" -->
 
 ### Associated Type Data
 
@@ -1118,11 +1118,11 @@ Notes:
 
 ---
 
-<!-- .slide: data-auto-animate data-timing="42" -->
+<!-- .slide: data-auto-animate data-timing="47" -->
 
 ### Associated Type Data
 
-<pre style="font-size: 0.55em"><code data-line-numbers="3-8|10-16|18-23|20|21|25-32|46|47-49|51-57" data-noescape data-trim>
+<pre style="font-size: 0.55em"><code data-line-numbers="3-8|10-16|18-23|20|21|25-32|46|47-49|46-57" data-noescape data-trim>
 use bones_schema::prelude::*;
 
 #[derive(HasSchema, Clone, Default, Debug)]
@@ -1185,11 +1185,11 @@ fn main() {
 
 Notes:
 
-- First we define our `StorageMode` enum, we have an `OnDemand` variant and a `PreAllocate` variant.
-- Note that it has to derive `HasSchema` before it can be added as type data. ⏭️
+- First we define our `StorageMode` enum, we have an `OnDemand` variant and a `PreAllocate` variant. ⏭️
 - Next we can use the `#[type_data]` attribute to set the storage mode to on-demand for our `Position` struct.
-- It's really that easy! You can even add the attribute multiple times to associate more type data.
-- The `type_data` attribute comes from the `HasSchema` derive macro, and it lets you put in any Rust expression that returns a type implementing `HasSchema`.
+- Adding type data is super easy!
+- You can even add the attribute multiple times to associate more type data.
+- The `type_data` attribute comes from the `HasSchema` derive macro, and it lets you put in any Rust expression.
 - This lets you make things extra ergonomic by letting you put function calls in the annotation.
 - We use this in the bones asset server for setting custom asset loaders.
 - It's cool because feels almost like making custom attributes without having to make a new macro for each new attribute.
@@ -1200,40 +1200,19 @@ Notes:
 - And then we tell it to pre-allocate 1000 times the size of our type.
 - This is definitely a contrived example, but it illustrates the point. ⏭️
 - Now, instead of setting the `type_data` directly, we can use the `derive_type_data` attribute to
-  automatically insert the `StorageMode` type data, based on `StorageMode`'s `FromType`
-  implementation.
-- Now let's see how we can get the type data from the schema. ⏭️
+  automatically gernate the `StorageMode` for that type.
+- This is very convenient.
+- Now, we can use our type data by getting it from the schema. ⏭️
 - We come back to our example of looping over schema boxes. ⏭️
-- Except this time, we get the schema, and load the `StorageMode` type data stored inside the schema.
+- This time, we get the schema, and load the `StorageMode` from it's type data. ⏭️
 - And we can print out the storage mode for each item. ⏭️
-
----
-
-<!-- .slide: data-auto-animate data-timing="42" -->
-
-### Associated Type Data
-
-<div style="font-size: 0.76em">
-
-- Set custom asset loaders
-- Set custom metadata deserializers
-- Recognize asset handles during asset loading 
-- Whatever you want!
-
-</div>
-
-Notes:
-
-- In the bones asset loader, we use this functionality to let you specify custom asset loaders for different Rust types,
-- as well as set custom metadata deserializers with serde, if the built-in `#[repr(C)]` deserialization isn't flexible enough.
-- It's also used to recognize when you put an asset handle in your Rust struct, so that it can cause
-  that handle to trigger another asset load while it's being deserialized.
-- The cool part is that you can use it for whatever you want!
+- The cool part about all of this is that you can use it for whatever you want!
 - It's kind of like the bones schema version of implementing a trait. ⏭️
 
+
 ---
 
-<!-- .slide: data-timing="42" -->
+<!-- .slide: data-timing="12" -->
 
 ### That's All! 👋
 
