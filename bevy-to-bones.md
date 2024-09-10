@@ -7,6 +7,9 @@ Major points to cover:
  -->
 
 <style>
+.reveal h4 {
+  font-size: 1.2em;
+}
 code {
     font-size: 0.8em;
     color: #C98BFF;
@@ -35,9 +38,13 @@ code::-webkit-scrollbar-thumb {
 
 Notes:
 
-- Hey everyone!
-- Today I'm going to talk about mine and the Jumpy community's journey from Bevy to Bones
-- as we "accidentally" made a game engine.
+- Hey everyone, I'm @zicklag.
+- I've been working on Rust game dev on and off for the last 5 years, and I started using Bevy when it
+  was publicly announced 4 years ago.
+- I'm self-taught and have been learning everything from Rust to graphics programming just by trying
+  things out, and doing whatever I needed to get stuff done.
+- I'm excited to be here, and today I'm going to talk about the journey that me and the Jumpy community
+  took as we "accidentally" made our own game engine.
 
 ---
 
@@ -47,27 +54,11 @@ Isn't This a _Bevy_ Meetup?
 
 Notes:
 
-- The first thing you might be asking is, "isn't this a _Bevy_ meetup?
-- The answer to that of course is yes, but
-- as you'll see ⏭
-
----
-
-<!-- .slide: data-auto-animate data-timing="8" -->
-
-Isn't This a _Bevy_ Meetup?
-
-Yes, **we couldn't have made <u>Bones</u> without <u>Bevy</u>**
-
-Bones is like Bevy's **little brother**
-
-<!-- .element: class="fragment" style="margin-top: 1em"  -->
-
-Notes:
-
-- we couldn't have made Bones without Bevy
-- Bones was **heavily** influenced by Bevy's design and is in fact
-- ⏭️ kind of like Bevy's little brother.
+- A question you might be asking at this point is, "isn't this a _Bevy_ meetup?"
+- Of course it is, but as you'll see,
+- our engine, Bones, has learned so much from Bevy that it would have been completely impossible to
+  make Bones without it.
+- Bones is kind of like Bevy's little brother.
 
 ---
 
@@ -75,62 +66,36 @@ Notes:
 
 <!-- .slide: data-timing="10" data-background-video="jumpy-presentation.webm" data-background-video-muted="true" data-background-opacity="0.50" data-background-video-loop="true" -->
 
-2D <!-- .element: class="fragment fade-left"  -->
+2D
 
-Multiplayer <!-- .element: class="fragment fade-right"  -->
+Multiplayer
 
-Shooter Game <!-- .element: class="fragment fade-up"  -->
+Shooter Game
 
-✨ With Modding ✨ <!-- .element: class="fragment"  -->
+<span class="fragment">✨ With Modding ✨</span>
 
 Notes:
 
 - That brings us to "What is Jumpy?"
 - Jumpy is a
-- ⏭ ️2D
-- ⏭️ Multiplayer
-- ⏭️ Shooter Game
-- that's all about fun couch play, emergent gameplay, and importantly ⏭️
+- ️2D
+- Multiplayer
+- Shooter Game
+- that's all about great local play, fast reflexes, and importantly ⏭️
 - ✨ _modding_ ✨
 
 ---
 
-### Rewriting Jumpy In Bevy
-
-<!-- .slide: data-timing="10" -->
-
-<ul>
-    <li>Jumpy was using <a href="https://macroquad.rs/" target="_blank">Macroquad</a></li>
-    <li>But we were already using Bevy for <a href="https://github.com/fishfolk/punchy/" target="_blank">Punchy</a></li>
-</ul>
+### Rewriting Jumpy with Bevy
 
 Notes:
 
-- When I took over as lead developer for Jumpy, it was currently written with Macroquad.
-- But we were already using bevy for Punchy, another game in the Fish Folk universe, and it was going very well.
-
----
-
-### Advantages to Bevy
-
-<!-- .slide: data-timing="25" -->
-
-- Large community
-- Good cross-platform support
-- We already had prior Bevy investments:
-  - Nested YAML Asset System
-  - <span style="display: flex; align-items: center;">Scripting: <code style="font-size: 0.7em; margin-left: 0.5em;">bevy_mod_js_scripting</code></span>
-
-Notes:
-
-- That led us to consider rewriting Jumpy in Bevy.
-- There were some compelling advantages.
-- For one, Bevy had a large and growing community, which had already shown a lot of ability to get
-  things done
-- It had good cross-platform and rendering support, and we would be able to re-use some of the Bevy
-  stuff that we had made for Punchy.
-- A particularly appealing thought was that we would be able to use the new `bevy_mod_js_scripting`
-  plugin that I had recently integrated with Punchy.
+- 2 years ago, when I took over as the lead developer for Jumpy, it was already using Macroquad for
+  it's engine.
+- I had more experience with Bevy, though, and we were already using Bevy for another game, and we
+  could share a lot of the knowledge and resources between them if we used Bevy for both.
+- So we decided the best option was just to rewrite Jumpy to run on Bevy.
+- I was pretty excited.
 
 ---
 
@@ -153,13 +118,13 @@ Notes:
 
 Notes:
 
-- So to enable modding and to use the same engine for more of our games, we started rewriting Jumpy in Bevy.
-- This actually went really well. We got
+- I started working right away, and things went really well.
+- We got
 - ⏭️ maps loading,
 - ⏭️ physics ported,
 - the ⏭️ main menu,
 - and even had the start to an in-game ⏭️ map editor, all in pretty good time.
-- Then came the next big hurdle, and something I had never done before
+- Then came the real challenge, and something that I had never done before...
 
 ---
 
@@ -169,7 +134,7 @@ Notes:
 
 Notes:
 
-- Networking.
+- Networking...
 
 ---
 
@@ -180,16 +145,18 @@ Notes:
 
 <h3 style="color: #22D491;">Naïve Client-Server</h4>
 
-- Horrible skipping and jittering during play
-- Networking code is mixed with gameplay code
+- Horrible skipping
+- Mixes gameplay & networking code
+
 </div>
 
 Notes:
 
-- I started off with a client-server model, running a headless Bevy instance on the server and synchronizing transforms.
-- While it kind of worked, the players were constantly skipping and jittering around during play.
-- Additionally, the networking code had to be mixed in with the gameplay code. It was easy to make a change in the game that would
-  break networking unintentionally.
+- I started off trying the simplest thing I could think of: a headless bevy server that synchronizes
+  transforms between clients.
+- While this kind of worked, the skipping was horrible and it was unplayable.
+- I also had to add a bunch of networking code all throughout the gameplay code, which was annoying
+  and complicated.
 
 ---
 
@@ -200,15 +167,21 @@ Notes:
 
 <h3 style="color: #22D491;">Client-Server With Latency Compensation</h4>
 
-- Requires some form of sync-then-fast-forward.
+- Requires sync and fast-forward
 </div>
 
 Notes:
 
-- After doing more research I found out that, in order to get smoother network play, I have to take into account the network latency between the client and the server.
+- Then I did a bunch of thinking and research realized that to get smoother gampelay you have to
+  compensate for the network latency.
+- That means syncing with the server and then fast-forwarding the game in the background to make up
+  for the network delay.
+- If I was going to go through all that trouble, I thought it was worth trying an other option first.
+
+<!-- - After doing more research I found out that, in order to get smoother network play, I have to take into account the network latency between the client and the server.
 - This means that when the client gets an update from the server, the game must realize that the update actually came from, say 100ms ago, because of the network ping, and
   then it has to actually play the game in fast-forward, behind the scenes, to catch up to the present time.
-- This was doable, for sure, but if I was going to bother with syncing and fast-forwarding, this was going to be harder than I thought, and it was worth considering another networking model first.
+- This was doable, for sure, but if I was going to bother with syncing and fast-forwarding, this was going to be harder than I thought, and it was worth considering another networking model first. -->
 
 ---
 
@@ -219,13 +192,23 @@ Notes:
 
 <h3 style="color: #22D491;">Peer-to-Peer Rollback</h4>
 
-- Doesn't require servers!
-- Requires <u>Determinism</u> and <u>Snapshot & Restore</u>
-- Gameplay code is cleanly separate from network code
+- No servers!
+- Simple gameplay code!
+- Requires <span style="color: #C6522C">Determinism</span> and <span style="color: #C6522C">Snapshot / Restore</span>
 
 Notes:
 
-- Peer-to-peer rollback networking does a similar rewind and fast-forward thing, but it doesn't require running a headless Bevy instance on a server.
+- I had heard of peer-to-peer rollback networking, which was really cool because it didn't require a
+  dedicated server.
+- Clients could connect directly to each-other instead.
+- On top of this, the gameplay code could can stay the same during network and offline play, instead
+  of having to mix network messages in with normal gameplay.
+- The caveat was that the gameplay had to be deterministic, and you had to be able to
+  create and restore snapshots of it.
+- Jumpy is a simple game, so that didn't sound like it'd be too hard, and
+- Lucky for us, Bevy already had a plugin for peer-to-peer rollback networking.
+
+<!-- - Peer-to-peer rollback networking does a similar rewind and fast-forward thing, but it doesn't require running a headless Bevy instance on a server.
 - That's really handy for making network gaming inexpensive or even free, which is a big deal for our idea of "Everlasting games".
 - The caveat is that it requires the game to be deterministic, and to support snapshot and restore.
 - These features are harder to get than they might seem, but there's a great payoff.
@@ -233,33 +216,8 @@ Notes:
 - It also had one other big advantage:
 - The networking code could stay completely separate from the gameplay code.
 - This would make it **way** easier for us to ensure that network games worked just as well as local games.
-- Lucky for us, Bevy already had peer-to-peer networking plugin, called Bevy GGRS.
+- Lucky for us, Bevy already had peer-to-peer networking plugin, called Bevy GGRS. -->
 </div>
-
----
-
-<!-- .slide: data-timing="30" data-auto-animate -->
-
-### Bevy GGRS
-
-<div style="font-size: 0.8em">
-
-- Might run up to <span style="color: #C6522C">8</span> game updates in a single frame
-- Each game update must finish in less than <span style="color: #C6522C">2ms</span>
-- `bevy_mod_js_scripting` was not fast enough on web
-- No more scripting for now.
-
-</div>
-
-Notes:
-
-- We started using Bevy GGRS for Jumpy, and we were very happy with how it simplified the game code.
-- Unfortunately we ran into a performance problem with our scripting solution.
-- Since GGRS has to do rollbacks and fast-forwards depending on network conditions, it may run the game update up to 8 times in a single render frame.
-- This means that our game update, if we are targeting 60 frames-per-second, has to finish within 2 milliseconds!
-- Unfortunately, we found out that the `bevy_mod_js_scripting` plugin had too much overhead on web, even though it worked fine on native.
-- It's just not very fast to make calls out of WASM into the browser.
-- So for now, we decided to just remove scripting and look more into it later.
 
 ---
 
@@ -267,22 +225,24 @@ Notes:
 
 ### Bevy GGRS
 
-<div style="font-size: 0.6em">
-
-- ✅ &nbsp; Handles the snapshot / restore for you!
-- ❌ &nbsp; You have to be careful not to break snapshots or determinism:
-  - Can't use events or `Local<State>` parameters
-  - `GlobalTransform`s can't be read
-  - All queries must be sorted
-  - You must attach a `RollbackId` to synced entities
-  - You must be careful with entity hierarchies in some situations
-  - Storing `Entity`s in components requires implementing `MapEntities`
-
-</div>
+- <span style="color: #22D491;">Handles all the networking for you!</span>
+- You have to be <em style="color: #C6522C">very careful</em> not to break determinism or snapshot / restore.
 
 Notes:
 
-- As we continued to use Bevy GGRS, we ran into quite a few gotchas.
+- So we started testing out the Bevy GGRS plugin and we were really happy with how much it
+  simplified the game code.
+- But we started to have some serious problems keeping the game deterministic.
+- Bevy is designed for maximum performance and multithreading, and that is often in conflict with determinism.
+- Doing normal things like iterating over a query turned into a problem, because now we had to
+  collect the query results and sort them to make sure that the iteration order was deterministic.
+- Many things in Bevy are impossible to snapshot and restore, so the more we did, the more gotchas we found.
+- We couldn't use `GlobalTransform`s or `Local` system params, and we couldn't use events.
+- These were all things that were super easy to miss, and now with every change we made, we risked
+  unintentionally breaking our determinism.
+- This was really bad for new contributors, and just for overall development peace-of-mind.
+
+<!-- - As we continued to use Bevy GGRS, we ran into quite a few gotchas.
 - Bevy's design is very focused on performance, and that, in most cases, comes at the expense of determinism.
 - On top of that, very little in Bevy lends itself to snapshot and restore.
 - This meant that there were a lot of Bevy features we either couldn't use, or had to be extra careful with.
@@ -293,52 +253,48 @@ Notes:
 - and storing `Entity`s in components requires implementing an extra `MapEntities` trait.
 - All of these things were really easy to miss, and it was now a looming threat that with every change we made to the game, we could accidentally break determinism.
 - It felt like a new kind of "undefined behavior" to avoid, and in that respect, all the code was now `unsafe`.
-- These issues weren't GGRS's fault, there were just no good ways get deterministic snapshot restore in Bevy.
+- These issues weren't GGRS's fault, there were just no good ways get deterministic snapshot restore in Bevy. -->
 
 ---
 
 <!-- .slide: data-timing="30" -->
 
-### A Deterministic Box
+### Bones ECS
+
+<h3 style="color: #22D491; font-size: 1.1em">A Deterministic Box</h4>
 
 A _tiny_ ECS
 
-With a `World` that you can `.clone()`
+With a `World` you can `.clone()`
+
+<span class="fragment" style="position: absolute; right: 0; bottom: -4em; font-size: 0.75em; transform: rotate(-5deg)">✨ and scripting...? ✨</span>
 
 Notes:
 
-- This led to a good deal of thinking about possible solutions.
-- We could re-consider client-server, but it seemed like we'd still have a similar feeling of "undefined behavior" by having to do network-specific handling
-  all throughout our gameplay code again.
-- I started thinking about what it would take to put the Jumpy's core gameplay logic in it's own deterministic "Box".
-- We could make our own simple ECS that we could use, and we could make the whole world `.clone()`-able so that it would be trivial to snapshot and restore.
-- Or better than making our own, we could just find somebody else who did it.
+- So I did a lot of thinking about what it would take to put the Jumpy's core gameplay
+  logic in it's own deterministic "Box", so to speak.
+- We could make our own tiny ECS,
+- and make the whole world `.clone()`-able so that it would be trivial to snapshot and restore.
+- I started by forking Planck, the simplest Rust ECS I could find.
+- It used plain vectors for storage and bitset operations for queries.
+- We forked it, called it Bones ECS, ⏭️ and made just a couple tweaks to make it more suitable for
+  scripting.
+- But scripting would come later.
+<!-- - The one thing I wanted to change was to make it capable of storing runtime defined types, a
+  crucial feature for our future modding and scripting goals.
+- See, the hope was that on top of determinism, we might be able to unlock some scripting potential.
+- The Bevy ECS, being as complicated as it is, was a lot harder to add scripting to.
+- Our new Bones ECS on the other hand, focused heavily on simplicity, so the hope was that it would
+  be a lot easier to add scripting features to later on. -->
 
----
-
-<!-- .slide: data-timing="41" -->
-
-### Bone ECS: First Pass
-
-<div style="font-size: 0.7em">
-
-- Start with a fork of Planck ECS
-- Planck component storage is built on `Vec<T>` and bitsets
-- Modify component storage to allow for runtime-defined types
-- Bones ECS is easier to script than Bevy ECS
-
-</div>
-
-Notes:
-
-- We started off by forking Planck ECS, the simplest Rust ECS I could find.
+<!-- - We started off by forking Planck ECS, the simplest Rust ECS I could find.
 - Planck used normal Rust vectors for storage, and used bitsets operations to do queries over components.
 - The only one major modification I wanted to make to it was to allow us to store runtime-defined types.
 - This was a step back in the direction of scripting.
 - Because Bones ECS was going to stay small and simple, it would be much easier to implement scripting for.
 - While there was promising progress with `bevy_mod_js_scripting` it was also very complicated, and there were still big questions
   about how to make certain things work in scripts, especially when it came to interacting with assets.
-- By doing our own scriptable ECS for the gameplay, it would be easier to get the modding experience we were looking for.
+- By doing our own scriptable ECS for the gameplay, it would be easier to get the modding experience we were looking for. -->
 
 ---
 
@@ -347,12 +303,27 @@ Notes:
 ### Bevy + Bones
 
 <div>
-  <img src="./bones-in-bevy.excalidraw.png" style="max-width: 80%" />
+  <img src="./bones-in-bevy.excalidraw.png" style="max-width: 90%" />
 </div>
 
 Notes:
 
-- After finishing the first draft of the Bones ECS, we started porting the core Jumpy gameplay to use it instead of the Bevy ECS.
+- Now we started migrating the Jumpy gameplay code from the Bevy ECS to the Bones ECS.
+- This was a big-ish rewrite, and there was lot more boilerplate than I had imagined.
+- But finally we got the game working again, and now we had a very interesting architecture.
+- When the game starts up, shows the menu, and it's just a normal Bevy game,
+- but when you start a match, it creates a new Bones ECS world, and starts sending the controller
+  inputs into it.
+- The Jumpy gameplay code all runs inside the bones ECS, and it creates entities for the sprites,
+  camera, and tilemap, etc.
+- On each frame, a Bevy system will then read all of the sprites out of the Bones world, and render
+  them in Bevy.
+- So as the player, it looks like nothing has changed.
+- On the inside, though, GGRS is now able to make a complete snapshot of the Bones World whenever it
+  needs to, and the all the gameplay inside is completely deterministic.
+- It was working, and we were excited!
+
+<!-- - After finishing the first draft of the Bones ECS, we started porting the core Jumpy gameplay to use it instead of the Bevy ECS.
 - This was a big-ish rewrite, and there was a lot more boilerplate than I imagined to get input and rendering types made for Bones.
 - We also had to postpone proper asset handling, and a temporary, annoying integration with Bevy's asset server was used to get things rolling.
 - The good news was that porting was straight-forward, if tedious.
@@ -362,28 +333,7 @@ Notes:
 - For network games, GGRS would send the input to the bones world, as well as instruct it to create or restore snapshots when necessary.
 - After a lot of work we finally had a nice and clean architecture, where we didn't have to think constantly about networking.
 - We also got an interesting bonus, the Jumpy match gameplay was now renderer agnostic.
-- Because it was isolated and deterministic, we could have rendered it in Bevy, or macroquad without changing the gameplay at all.
-
----
-
-<!-- .slide: data-timing="16" -->
-
-### Problems With Bevy + Bones
-
-<div style="font-size: 0.9em">
-
-- Now we have <span style="color: #C6522C">two</span> ECS's to deal with
-- The asset integration is annoying
-- The Bones world can't render UI
-
-</div>
-
-Notes:
-
-- There were still things to be desired, though.
-- Having to deal with two different ECS's and schedulers could be confusing.
-- The asset integration still required annoying conversions between bones and bevy asset paths.
-- And the bones world couldn't render UI, because all the UI was in the outer Bevy shell.
+- Because it was isolated and deterministic, we could have rendered it in Bevy, or macroquad without changing the gameplay at all. -->
 
 ---
 
@@ -391,21 +341,20 @@ Notes:
 
 ### Bones Framework
 
-<div style="font-size: 0.8em">
-
-- Create a new Bones Framework
-- Start moving pieces of Jumpy into Bones
-  - Egui & Widgets
-  - GGRS & Networking
-- Use a multi-`World` pattern to keep core gameplay isolated
-- Make Bevy a supported <span style="color: #22D491">Bones Framework renderer</span>
-- Create a proper Bones asset server
-
-</div>
+- Avoid having to use <span style="color: #C6522C">two</span> ECSs
+- Use Bevy in the background for Rendering
 
 Notes:
 
-- The next step, was to create a unified Bones Framework.
+- Things weren't perfect though.
+- For one, now we had two ECSs to deal with.
+- This was confusing, especially for new contributors, and there were annoying things like having to
+  put the GUI stuff in Bevy, and the gameplay stuff in Bones.
+- So we started working on a unified Bones Framework.
+- The framework would allow Jumpy to use Bones ECS for everything.
+- But in the background, we would still use Bevy for rendering.
+
+<!-- - The next step, was to create a unified Bones Framework.
 - We would start moving pieces of Jumpy into the new framework, such as the Egui widgets and the networking logic.
 - We would use a multi-`World` strategy, so that you could have one bones world for the menu that would create separate, isolated gameplay worlds for the matches.
 - This multi-`World` setup let us keep all the great advantages of having a separate gameplay world, while only needing to learn one ECS.
@@ -413,7 +362,7 @@ Notes:
 - Then we would use Bevy as a rendering integration.
 - Bones games are renderer agnostic, they take bones-formatted input and create standardized rendering components.
 - Any renderer that could render sprites, tilemaps, egui, and debug lines, could be integrated as a renderer, but Bevy would be our official renderer.
-- The can of worms in this whole setup was the asset server.
+- The can of worms in this whole setup was the asset server. -->
 
 ---
 
@@ -421,30 +370,28 @@ Notes:
 
 ### Bones Asset Server
 
-<div style="font-size: 0.8em">
+- Load YAML files automatically into Rust structs
+- Support user asset packs
 
-- Assets are either `Metadata` assets or `Custom` assets
-- `Metadata` assets:
-  - are loaded from YAML files
-  - can reference other assets in a hierarchy
-  - are automatically deserialized into Rust structs
-- Custom asset server would enable:
-  - User-installed asset packs
-  - Network mod synchronization
-
-</div>
+<span class="fragment" style="position: absolute; right: 0; bottom: -3em; font-size: 0.75em; transform: rotate(-5deg)">✨ and scripting...? ✨</span>
 
 Notes:
 
-- The Bones asset server was going to better facilitate the way we handled assets in Jumpy.
-- In Jumpy, we have a concept of metadata assets.
-- These assets are loaded from YAMl files and deserialized into Rust structs.
-- Metadata assets contain all of our game config, and can reference other assets to build an asset hierarchy.
-- In Bevy we had a custom derive macro that could be used to automatically generate asset loaders
-  from our Rust structs.
-- This derive setup, though, had some rough edges and with our own asset server, we could make it
-  really seamless.
-- We could also add first-class support for user-installed asset and mod packs.
+- The first step to creating the Bones Framework was to make a proper asset server.
+- We had this planned since we started working on the Bones ECS and realized that integrating with
+  the Bevy asset server was not working very well.
+- We also had some very specific goals around moddability.
+- For one, we wanted user asset packs to be a first-class citizen.
+- For two, we wanted an easy way to load all of our games config and assets easily through YAML
+  files.
+- We already had this setup with Bevy, where we used a derive macro to automatically generate asset
+  loaders from Rust structs to laod data from YAML files with serde.
+- Things got complicated though, when we wanted a YAML file to be able to reference another YAML
+  file or another asset.
+- It kind of worked, but it was a pain.
+- Having our own asset server would let us support both of these use-cases seamlessly, with
+  first-class developer experience. ⏭️
+- It would also help with scripting in the future.
 
 ---
 
@@ -452,25 +399,18 @@ Notes:
 
 ### Runtime Defined Types
 
-<div style="font-size: 0.8em">
-
-- Different asset types have different extensions
-  - `.weapon.yaml`
-  - `.map.yaml`
-- Metadata assets are <span style="color: #22D491">validated</span> when loaded
-  - A `blunderbass.weapon.yaml` must match the `weapon` schema
-- Mods can define _new_ schemas
-
-</div>
-
 Notes:
 
-- The new metadata asset deserialization took more thought than I anticipated, though.
-- The reason was that I wanted to be able to deserialize runtime-defined types.
-- For example, when the asset server loads `blunderbass.weapon.yaml`, it makes sure that the YAML file matches the `weapon` schema.
-- When you write Rust, this weapon schema would be derived from the Rust struct.
-- If you write a scripted mod, though, it may need to load assets that have never been defined in Rust.
-- There has to be a way for mods to define their own schemas for assets.
+- When it came to our YAML asset system things were a bit harder than I expected, and that was
+  because I was trying to support runtime-defined asset types.
+- So, the use case is for modding.
+- Currently, each of our YAML assets, were derived from a Rust struct, and the loader wouldn't load
+  it if the YAML didn't have exactly the right fields.
+- I wanted to keep this type checking, but allow mods to define their own types; types that didn't
+  exist in Rust.
+- So I wanted some like a JSON schema, for our asset types.
+- After some experimentation, though, I realized that this was exactly what we needed for scripting,
+  too.
 
 ---
 
@@ -478,23 +418,24 @@ Notes:
 
 ### Bones Schema
 
-<div style="font-size: 0.7em">
-
-- Very similar in purpose to Bevy Reflect
-- Designed specifically to support scripting
+- Similar to Bevy Reflect
+- Designed specifically for scripting
 - Describes a <span style="color: #22D491">stable memory layout</span>
-  - Unlike Bevy Reflect
-  - Built on `#[repr(C)]`
-- Rust structs can derive `HasSchema`
-- Used by the asset server for metadata assets
-- Used by the ECS for all component storage
-  - Enables storing runtime defined types
-
-</div>
+- `#[repr(C)]`
 
 Notes:
 
-- Interestingly, this is the _same_ thing that we needed for scripting.
+- This spawned the development of the Bones Schema crate
+- Bones Schema is very similar in purpose to Bevy Reflect, but it works quite differently.
+- Where Bevy Reflect uses trait objects, a Bones Schema describes a stable memory layout.
+- Basically, if you derive the `HasSchema` trait, and you add the `#[repr(C)]` annotation, you get a
+  schema describing the exact memory layout of the struct.
+- This schema can be accessed at runtime, and can also be created for types outside of Rust.
+- Once we got this working, it actually simplified our ECS code, and made the whole ECS compatible
+  with runtime defined types.
+- It was a **huge** step in the direction of scripting
+
+<!-- - Interestingly, this is the _same_ thing that we needed for scripting.
 - The more I thought about it, the more I realized that the asset server, our scripting solution, and even the Bones ECS itself, all needed the same thing:
 - a way to describe the layout of data.
 - This spawned the development of the Bones Schema crate.
@@ -504,27 +445,34 @@ Notes:
 - This can be used by the asset server to deserialize assets that match our Rust structs.
 - It can also be used by scripting implementations, allowing them to read and modify the data in the Rust types.
 - Finally, it worked very elegantly into the design of Bones ECS, allowing it to store anything that has a `Schema`,
-- even if that schema was registered at runtime, by a language other than Rust.
+- even if that schema was registered at runtime, by a language other than Rust. -->
 
 ---
 
 <!-- .slide: data-timing="47" -->
 
-### Migrating to the Bones Framework
+### Porting Jumpy to the Bones Framework
 
-<div style="font-size: 1em">
-
-- Finished Bones Schema
-- Integrated it with the Bones ECS
-- Finish the Bones asset server
-- Move reusable pieces of Jumpy into the Bones Framework
-- Migrate Jumpy to use the Bones Framework
-
-</div>
+- Jumpy is 100% on Bones!
+- It is also <span style="color: #22D491">Renderer Agnostic</span> 👀
 
 Notes:
 
-- While Bones Schema is quite simple in concept, there was a lot to figure out, and it was a big task.
+- After a lot more work to get everything tied together, we finally finished the Bones framework,
+  and migrated Jumpy to it.
+- Now Jumpy was 100% a bones game and there was no longer the confusion around having two
+  entity-component-systems.
+- On top of that, Jumpy, and the bones Framework were now renderer agnostic.
+- We were currently using Bevy as our rendering backend, but we could easily use anything else.
+- In bones, we have only 4 different kinds of renderables: sprites, tilemaps, debug lines, and
+  egui.
+- Any renderer that could display those 4 renderables could be used as a rendering backend.
+- And just because we started with those 4, didn't mean we couldn't easily add new ones, as
+  necessary.
+- We could also integrate with Bevy plugins if we wanted to later, for things like particles, or 2D
+  light effects.
+
+<!-- - While Bones Schema is quite simple in concept, there was a lot to figure out, and it was a big task.
 - It took longer than we planned, but we were accomplishing more than we planned, too.
 - We had hoped to finish an asset server, and ended up laying the foundation for scripting at the same time.
 - I was also really happy with how much more elegant the internals of the Bones ECS were, now that
@@ -532,7 +480,7 @@ Notes:
 - After we finally finished Bones Schema and the Bones asset server, we were ready to start moving pieces of Jumpy into the Bones framework.
 - This was also really nice, because now our other games could start to re-use things that we had developed for Jumpy.
 - Once that was done, we migrated Jumpy completely to the Bones Framework, removing all direct interaction with Bevy.
-- Jumpy was now fully a Bones game, and independent from it's renderer.
+- Jumpy was now fully a Bones game, and independent from it's renderer. -->
 
 ---
 
@@ -540,19 +488,27 @@ Notes:
 
 ### Bones Scripting
 
-<div style="font-size: .8em">
+✨ Lua scripting with `piccolo`! ✨
 
-- With Bones Schema in place, we were ready for a scripting language
-- We collaborated with `@kyren` and used their Lua VM, `piccolo`
-  - Using `piccolo` requires no `unsafe`
-  - `piccolo` runs in the browser with the `wasm32-unknown-unknown` target
-- Finally we have modding! 🎉
-
-</div>
+<div style="color: #00AFF8; margin-top: 1.5em">Even in the browser 🌐</div>
 
 Note:
 
-- Now that we had finished migrating Jumpy, we were tantalizingly close to supporting scripting.
+- Now that we had Jumpy migrated, we were tantalizingly close to supporting scripting.
+- We had been waiting for this for a while, and we had already been in contact with the author of
+  the `piccolo` lua VM.
+- All we had to do now was plug it in.
+- Or hypothetically anyway.
+- It turned out to be more work than we thought, like every other step of the process, but it was
+  worth it.
+- We were finally able to demonstrate adding a brand new item to the game, with a Lua and YAML asset
+  pack.
+- Personally, this was a huge deal.
+- I had been working on getting modding into multiple game engines for nearly 8 years, starting with
+  Godot, and every time, I failed.
+- Finally, it was working.
+
+<!-- - Now that we had finished migrating Jumpy, we were tantalizingly close to supporting scripting.
 - As far as we knew, everything was already in place, other than the scripting language itself.
 - We decided on `piccolo` , a Lua implementation written in pure Rust.
 - It had big plusses in that it could be used with without any `unsafe`, and it could target web with the `wasm32` target.
@@ -563,7 +519,7 @@ Note:
 - Finally it was working!
 - And the beautiful thing about it, is that it was implemented right into the core ECS.
 - Scripts were able to change any `#[repr(C)]` data in the ECS, without us having to explicitly add Lua bindings.
-- Now modders and developers could operate on the same world data, without clunky, manually written API bindings.
+- Now modders and developers could operate on the same world data, without clunky, manually written API bindings. -->
 
 ---
 
@@ -571,19 +527,25 @@ Note:
 
 ### Jumpy & Bones Today
 
-<div style="font-size: .8em">
+<span style="color: #22D491">Bones works great!</span>
 
-- Bones continues to prove it's worth
-- Jumpy currently uses Bevy for rendering
-- We are considering writing our own renderer using WGPU
-  - Removes a large number of dependencies from Bevy
-  - Cleans up our rendering integration
-
-</div>
+We will try making our own renderer soon
 
 Notes:
 
 - And that brings us to today
+- Bones continues to work really well for Jumpy and we really like it.
+- It does exactly what we need and we're free to grow it however we need along with Jumpy and our
+  other games that we will be building on bones.
+- Something we want to do do in the near future is to try making our own renderer for it.
+- Bones's rendering needs are really minimal, and right now, pulling in Bevy and it's ECS, it's
+  reflection system, and it's renderer; it's just a lot more than we need for bones.
+- Also, properly integrating with Bevy's renderer basically means writing a custom sprite pipeline,
+  which isn't really much easier than writing our own renderer right on WGPU directly.
+- We're hoping that this will cut down on dry compile times, which aren't the most important thing
+  in the world, but has been an impact to new contributors.
+
+<!-- - And that brings us to today
 - Bones continues to prove its worth as we keep developing and improving Jumpy.
 - Jumpy still uses Bevy as it's renderer, but we are considering writing our own renderer, too.
 - Jumpy's rendering needs are very simple: we've got sprites, tilemaps, egui, and debug lines,
@@ -597,7 +559,7 @@ Notes:
   update in Bevy ruined that, so we haven't updated beyond Bevy `0.11`.
 - We end up either having to write our own sprite renderer for Bevy, or
   we have to synchronize entities, which is not very efficient and is annoying and tricky.
-- This means it might be cleanest for us just to make our own renderer.
+- This means it might be cleanest for us just to make our own renderer. -->
 
 ---
 
@@ -605,19 +567,30 @@ Notes:
 
 ### Bones 🤝 Bevy
 
-<div style="font-size: .7em">
+We never meant to make a game engine
 
-- We never meant to make a game engine
-- We never could have done it without Bevy
+Bevy allowed us to make a game engine <em style="color: #C6522C">piece by piece</em>
+
+<span style="color: #22D491">While still working on our game</span>
+
+<!-- - We never could have done it without Bevy
 - It enabled us to explore and branch out, while <span style="color: #22D491">still working on our game</span>
 - Bevy allowed us to replace different pieces of it one-by-one
 - Bones has learned <span style="color: #C6522C;">so much</span> from Bevy
-
-</div>
+ -->
 
 Notes:
 
 - So, we never meant to make a game engine.
+- Even though we didn't plan on it, we are very happy with the way it turned out, and we could not
+  have done it without Bevy.
+- Bevy allowed us to continue working on Jumpy, while making Bones piece by piece.
+- Bevy was so modular we could combine it with our own ECS, with our own asset system.
+- It freed us to do whatever we needed to for our game.
+- And we learned _so much_ from bevy.
+- It helped inform so many design decisions we made in Bones
+
+<!-- - So, we never meant to make a game engine.
 - Our goal was to make we needed for networking and modding, in a way that we could share it with all our Rust games.
 - It turned out that what we needed, hadn't been made yet, and by building it step-by-step, we were
   able to make what we needed, even while still working on our game!
@@ -626,7 +599,27 @@ Notes:
 - Bevy also inspired many parts of bones; we learned a lot from it, and we still follow Bevy's
   journey and learn from Bevy discussions and development.
 - While we may not continue to use Bevy, if we make our own renderer, Bones will forever be in Bevy's debt,
-  and never would have existed without it.
+  and never would have existed without it. -->
+
+---
+
+## Thank You Bevy! 🕊️ 🎉
+
+Notes:
+
+- So, to everybody who helped make Bevy what it is, thank you.
+- We couldn't have made our game without you.
+
+---
+
+### A Tour of Bones Schema
+
+Notes:
+
+- Now I want to take some time to do a short tour of the Bones Schema system.
+- The schema system is probably one of the most interesting and original pieces of Bones, and it's also the piece
+  that could be most useful to other projects outside of Bones,
+- so it'll be fun to take a closer look at how it works.
 
 ---
 
@@ -651,17 +644,11 @@ fn main() {
 
 Note:
 
-- Finally, I wanted to share some short code examples for Bones Schema.
-- I think Bones Schema is probably one of the most interesting and original pieces of Bones, and it's also the piece that could be most useful to other non-bones projects,
-- so I think it'll be fun to look at and get an idea of what's possible with it.
-
---
-
-- First we're going to peek at the simplest thing you can do, which is derive the `HasSchema` trait on a Rust struct. ⏭️
+- First we're going to peek at the simplest thing you can do. ⏭️
 - Here we've got a simple `Position` struct with an `x` and a `y` field. ⏭️
-- We are just going to derive the `HasSchema`, `Clone`, and `Default` traits.
-- The `HasSchema` trait has one function on it that returns the `Schema` for the implementing type.
-- To see what that looks like, we're going to get our `Position` struct's schema and debug print it. ⏭️
+- We are just going to derive the `HasSchema`, `Clone`, and `Default` on it. ⏭️
+- The `HasSchema` trait just has one function and it returns the schema associated to a type.
+- To see what that looks like, we're going to get our `Position` schema and debug print it. 
 
 ---
 
@@ -708,14 +695,13 @@ Note:
 
 - As you can see, we get a lot of stuff here.
 - We're going to look at just a couple things for the moment. ⏭️
-- We can see that the schema tells us the short name and the full name of our type, which is very
+- First we see that the schema tells us the short name and the full name of our type, which is very
   handy for debugging, and for figuring out which type to import by name in scripts. ⏭️
-- We can also see what _kind_ of data makes up the schema.
+- We can also see what _kind_ of data our Position is.
 - In this case we see that it's an opaque primitive.
 - Since it's opaque all we know about the type is it's size and alignment.
-- That's not very much info, but it's just enough that we can insert the type into, for example, and
-  ECS.
-- If we want any kind of scripting powers, though, we need more info.
+- That's not very much info, but it's just enough that we can insert it, for example, into an ECS.
+- If we want any kind of scripting super powers, though, we need more info.
 
 ---
 
@@ -869,7 +855,7 @@ Note:
 
 Note:
 
-- Now, when we run the example, instead of seeing an opaque primitive type, we see a `struct` type. ⏭️
+- Now, when we run it, instead of seeing an opaque primitive type, we see a `struct` type. ⏭️
 - The struct info tell us the fields of the struct ⏭️
 - The names of each field ⏭️
 - And the schema of each field ⏭️
@@ -877,7 +863,6 @@ Note:
 - The schema now has enough info for scripts to come in and edit the memory of the struct, without
   triggering undefined behavior.
 - The schema tells us what can be safely done with the data.
-- ⏭️
 
 ---
 
@@ -885,7 +870,7 @@ Note:
 
 ### `SchemaBox` for Type Erasure
 
-<pre style="font-size: 0.5em"><code data-line-numbers="3-16|19-24|25-26|28|30|31-32" data-noescape data-trim>
+<pre style="font-size: 0.5em"><code data-line-numbers="3-16|19-24|25-26|28|30|31-32|33-34" data-noescape data-trim>
 use bones_schema::prelude::*;
 
 #[derive(HasSchema, Clone, Default)]
@@ -928,18 +913,20 @@ fn main() {
 Notes:
 
 - Now we're going to look at what kinds of abilities this gives us in Rust.
-- We'll start by adding another struct, in this case a `Velocity` struct, that also derives `HasSchema`.
-- ⏭️ First we create an instance of a Position and a Velocity
-- ⏭️ Then we stick them both in their own `SchemaBox`es.
+- We'll start by adding another struct, in this case a `Velocity` struct. ⏭️ 
+- First we create an instance of both a Position and a Velocity ⏭ ️
+- Then we stick them both in their own `SchemaBox`es.
 - The `SchemaBox` is one of the most used types in Bones schema, and is in fact very much like a `Box<dyn Any>`.
 - By putting the position and the velocity in boxes we "erase" the type, so to speak, so that even
-  though there are different types on the inside, they are the same type on the outside.
-- ⏭️ This lets us do things like stick both of them inside the same vector, which is impossible
-  normally, because every item in a vector must be the same type.
-- ⏭️ Now we can loop over the items in the vector.
-- ⏭️ And attempt to cast it to a specific type, printing the data if the cast succeeds.
-- This is not really any different than what you can already do with a `Box<dyn Any>`, though.
-- Let's get a little deeper. ⏭️
+  though there are different types on the inside, they are the same type on the outside. ⏭️
+- This lets us do things like stick both of them inside the same vector, which is impossible
+  normally, because every item in a vector must be the same type. ⏭ ️
+- Now we can loop over the items in the vector. ⏭️
+- And attempt to cast it to a specific type.
+- In this case we try to cast it to a position, and if it succeeds we print it out. ⏭️
+- And we can do the same thing with the velocity.
+- This is not really any different than what you can already do with a `Box<dyn Any>`, though,
+- so let's get a little deeper.
 
 ---
 
@@ -1030,7 +1017,7 @@ struct Velocity {
 
 static MY_POS: &str = r#"
 x: 10
-y: 5.5   
+y: 5.5
 "#;
 
 fn main() {
@@ -1208,7 +1195,6 @@ Notes:
 - And we can print out the storage mode for each item. ⏭️
 - The cool part about all of this is that you can use it for whatever you want!
 - It's kind of like the bones schema version of implementing a trait. ⏭️
-
 
 ---
 
