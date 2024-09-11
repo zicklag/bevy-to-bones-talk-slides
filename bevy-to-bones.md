@@ -32,11 +32,18 @@ code::-webkit-scrollbar-thumb {
 
 ### From Bevy to Bones
 
-<!-- .slide: data-timing="8" -->
+<!-- .slide: -->
 
 **"Accidentally" Making a Game Engine**
 
 Notes:
+
+<!-- - I'm zicklag
+- Rust gamedev last 5 years
+- Using Bevy since announcement 4 years
+- Self taught rust & graphics
+- super excited
+- share journey of jumpy accidentally making a game engine -->
 
 - Hey everyone, I'm @zicklag.
 - I've been working on Rust game dev on and off for the last 5 years, and I started using Bevy when it
@@ -48,11 +55,15 @@ Notes:
 
 ---
 
-<!-- .slide: data-auto-animate data-timing="8" -->
+<!-- .slide: data-auto-animate -->
 
 Isn't This a _Bevy_ Meetup?
 
 Notes:
+
+<!-- - Is this bevy meetup?
+- our engine, bones learned from bevy,
+- it's like little brother -->
 
 - A question you might be asking at this point is, "isn't this a _Bevy_ meetup?"
 - Of course it is, but as you'll see,
@@ -64,7 +75,7 @@ Notes:
 
 ## What is Jumpy?
 
-<!-- .slide: data-timing="10" data-background-video="jumpy-presentation.webm" data-background-video-muted="true" data-background-opacity="0.50" data-background-video-loop="true" -->
+<!-- .slide: data-background-video="jumpy-presentation.webm" data-background-video-muted="true" data-background-opacity="0.50" data-background-video-loop="true" -->
 
 2D
 
@@ -75,6 +86,13 @@ Shooter Game
 <span class="fragment">✨ With Modding ✨</span>
 
 Notes:
+<!-- 
+- What is jumpy?
+- 2D
+- Multiplayer
+- Shooter Game
+- great local play, fast reflexes, and importantly ⏭️
+- modding -->
 
 - That brings us to "What is Jumpy?"
 - Jumpy is a
@@ -86,7 +104,11 @@ Notes:
 
 ---
 
-### Rewriting Jumpy with Bevy
+### Rewriting Jumpy
+
+Jumpy was using <span style="color: #C6522C">Macroquad</span>
+
+But we wanted to use <span style="color: #22D491;">Bevy</span>
 
 Notes:
 
@@ -101,7 +123,7 @@ Notes:
 
 ### Start Working! 👨‍🔧
 
-<!-- .slide: data-timing="20" -->
+<!-- .slide: -->
 
 <div style="display: flex; justify-content: center; align-items: center;">
     <img src="./fishfolk-logo.png" style="width: 10" />
@@ -128,7 +150,7 @@ Notes:
 
 ---
 
-<!-- .slide: data-auto-animate data-timing="2" data-background-image="networking-cc0-upscaled.png" data-background-opacity="0.85" data-background-transition="zoom" -->
+<!-- .slide: data-auto-animate data-background-image="networking-cc0-upscaled.png" data-background-opacity="0.85" data-background-transition="zoom" -->
 
 <h2><span style="background-color: hsla(0, 0%, 8%, 0.95); padding: 0.2em 0.3em; border-radius: 0.2em;">Networking</span></h3>
 
@@ -138,7 +160,7 @@ Notes:
 
 ---
 
-<!-- .slide: data-auto-animate data-timing="18" -->
+<!-- .slide: data-auto-animate -->
 
 <h2 style="position: relative; top: -1em">Networking</h2>
 <div style="position: relative; top: -2em; font-size: 0.9em">
@@ -160,7 +182,7 @@ Notes:
 
 ---
 
-<!-- .slide: data-timing="45" -->
+<!-- .slide: -->
 
 <h2 style="position: relative; top: -1em">Networking</h2>
 <div style="position: relative; top: -2em; font-size: 0.9em">
@@ -185,7 +207,7 @@ Notes:
 
 ---
 
-<!-- .slide: data-timing="36" -->
+<!-- .slide: -->
 
 <h2 style="position: relative; top: -1em">Networking</h2>
 <div style="position: relative; top: -2em; font-size: 0.9em">
@@ -221,7 +243,7 @@ Notes:
 
 ---
 
-<!-- .slide: data-auto-animate data-timing="64" -->
+<!-- .slide: data-auto-animate -->
 
 ### Bevy GGRS
 
@@ -257,7 +279,7 @@ Notes:
 
 ---
 
-<!-- .slide: data-timing="30" -->
+<!-- .slide: -->
 
 ### Bones ECS
 
@@ -297,7 +319,7 @@ Notes:
 
 ---
 
-<!-- .slide: data-timing="64" -->
+<!-- .slide: -->
 
 ### Bevy + Bones
 
@@ -336,7 +358,7 @@ Notes:
 
 ---
 
-<!-- .slide: data-timing="47" -->
+<!-- .slide: -->
 
 ### Bones Framework
 
@@ -365,7 +387,7 @@ Notes:
 
 ---
 
-<!-- .slide: data-timing="35" -->
+<!-- .slide: -->
 
 ### Bones Asset Server
 
@@ -394,7 +416,7 @@ Notes:
 
 ---
 
-<!-- .slide: data-timing="33" -->
+<!-- .slide: -->
 
 ### Runtime Defined Types
 
@@ -413,7 +435,7 @@ Notes:
 
 ---
 
-<!-- .slide: data-timing="58" -->
+<!-- .slide: -->
 
 ### Bones Schema
 
@@ -448,7 +470,7 @@ Notes:
 
 ---
 
-<!-- .slide: data-timing="47" -->
+<!-- .slide: -->
 
 ### Porting Jumpy to the Bones Framework
 
@@ -483,7 +505,7 @@ Notes:
 
 ---
 
-<!-- .slide: data-timing="66" -->
+<!-- .slide: -->
 
 ### Bones Scripting
 
@@ -522,7 +544,7 @@ Note:
 
 ---
 
-<!-- .slide: data-timing="60" -->
+<!-- .slide: -->
 
 ### Jumpy & Bones Today
 
@@ -562,7 +584,7 @@ Notes:
 
 ---
 
-<!-- .slide: data-timing="42" -->
+<!-- .slide: -->
 
 ### Bones 🤝 Bevy
 
@@ -622,7 +644,7 @@ Notes:
 
 ---
 
-<!-- .slide: data-auto-animate data-auto-animate-id="simple" data-timing="35" -->
+<!-- .slide: data-auto-animate data-auto-animate-id="simple" -->
 
 ### A Simple Schema
 
@@ -651,7 +673,7 @@ Note:
 
 ---
 
-<!-- .slide: data-auto-animate data-auto-animate-id="simple" data-timing="34" -->
+<!-- .slide: data-auto-animate data-auto-animate-id="simple" -->
 
 ### A Simple Schema
 
@@ -704,7 +726,7 @@ Note:
 
 ---
 
-<!-- .slide: data-auto-animate data-auto-animate-id="reprc" data-timing="10" -->
+<!-- .slide: data-auto-animate data-auto-animate-id="reprc" -->
 
 ### `#[repr(C)]` Schema
 
@@ -732,7 +754,7 @@ Note:
 
 ---
 
-<!-- .slide: data-auto-animate data-auto-animate-id="reprc" data-timing="15" -->
+<!-- .slide: data-auto-animate data-auto-animate-id="reprc" -->
 
 ### `#[repr(C)]` Schema
 
@@ -865,7 +887,7 @@ Note:
 
 ---
 
-<!-- .slide: data-timing="56" -->
+<!-- .slide: -->
 
 ### `SchemaBox` for Type Erasure
 
@@ -929,7 +951,7 @@ Notes:
 
 ---
 
-<!-- .slide: data-timing="44" -->
+<!-- .slide: -->
 
 ### `SchemaBox` for For Runtime Field Access
 
@@ -990,7 +1012,7 @@ Notes:
 
 ---
 
-<!-- .slide: data-timing="42" -->
+<!-- .slide: -->
 
 ### `SchemaBox` for Deserializing
 
@@ -1037,16 +1059,18 @@ Notes:
 - For example, if we have this small YAML snippet that we want to deserialize into a Position.
 - We haven't derived `serde::Deserialize` for `Position`, but we do have all the info we need
   already in the `Schema`. ⏭️
-- We can create a normal `serde_yaml` Deserializer from our YAML snippet. ⏭️
-- And then create a `SchemaDeserializer` for our `Position` schema, and use it to load the data into a SchemaBox.
-- ⏭️ After we have the box, we can cast it into a `Position`
-- ⏭️ and prove that the YAML data was correctly loaded by printing it.
-- This functionality is extremely useful in the Bones asset server, allowing us to automatically
-  load YAML assets into Rust structs.
+- We can create a normal `serde_yaml` Deserializer from our YAML snippet.
+- This is just normal serde_yaml stuff ⏭️
+- Then we create a `SchemaDeserializer` for our `Position` schema, and use it to load the data into a SchemaBox.
+- We could have given it any serde deserialize, so that we could deserialize from JSON, or TOML
+- ⏭️ After we have the schema box, we can cast it into a `Position`
+- ⏭️ and we can prove that the YAML data was correctly loaded by printing it.
+- This functionality is extremely useful in the Bones asset server, and is how we automatically load
+  YAML assets into Rust structs.
 
 ---
 
-<!-- .slide: data-timing="31" -->
+<!-- .slide: -->
 
 ### `Schema` for Runtime Defined Types
 
@@ -1071,7 +1095,7 @@ Note:
 
 ---
 
-<!-- .slide: data-auto-animate data-timing="35" -->
+<!-- .slide: data-auto-animate -->
 
 ### Associated Type Data
 
@@ -1094,7 +1118,7 @@ Notes:
 
 ---
 
-<!-- .slide: data-auto-animate data-timing="47" -->
+<!-- .slide: data-auto-animate -->
 
 ### Associated Type Data
 
@@ -1228,7 +1252,7 @@ Notes:
 
 ---
 
-<!-- .slide: data-timing="12" -->
+<!-- .slide: -->
 
 ### That's All! 👋
 
