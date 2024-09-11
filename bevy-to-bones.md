@@ -275,8 +275,7 @@ Notes:
   logic in it's own deterministic "Box", so to speak.
 - We could make our own tiny ECS,
 - and make the whole world `.clone()`-able so that it would be trivial to snapshot and restore.
-- I started by forking Planck, the simplest Rust ECS I could find.
-- It used plain vectors for storage and bitset operations for queries.
+- I started with Planck, the simplest Rust ECS I could find.
 - We forked it, called it Bones ECS, ⏭️ and made just a couple tweaks to make it more suitable for
   scripting.
 - But scripting would come later.
@@ -467,8 +466,8 @@ Notes:
 - In bones, we have only 4 different kinds of renderables: sprites, tilemaps, debug lines, and
   egui.
 - Any renderer that could display those 4 renderables could be used as a rendering backend.
-- And just because we started with those 4, didn't mean we couldn't easily add new ones, as
-  necessary.
+<!-- - And just because we started with those 4, didn't mean we couldn't easily add new ones, as
+  necessary. -->
 - We could also integrate with Bevy plugins if we wanted to later, for things like particles, or 2D
   light effects.
 
@@ -1061,9 +1060,6 @@ Note:
   at runtime, and everything works the same.
 - This is crucial for scripts that need to be able to store their own components in the Bones ECS,
   even though there isn't Rust type for it.
-- Beyond that every Rust type that has that `#[repr(C)]` annotation will be able to have it's fields
-  read and written to from scripts, because it's schema tells the script exactly what the script is
-  allowed to do with the component.
 
 <!-- - An important thing to note at this point is that schemas can be derived, but they can also be
   loaded from files at runtime.
