@@ -979,7 +979,7 @@ fn main() {
 
 Notes:
 
-- Because the schemas of `#[repr(C)]` types describe the fields of the type, we are able to access fields by their names at runtime.
+- Because the schemas now describe our fields, we are able access them by their names at runtime.
 - Here we have the same example as last time, but we modify the loop ⏭️
 - Instead of trying to cast to a specific Rust type, now we use the `as_ref()` function get a
   `SchemaRef`, which is similar to a reference `dyn Any`. ⏭️
@@ -988,7 +988,6 @@ Notes:
 - ⏭️ This lets us print the `x` field of each item in our vector, even though one of them is a
   `Position` and the other one is a `Velocity`.
 - This kind of ability is essential for scripting, and also very useful for things like ECS world explorers.
-- ⏭️
 
 ---
 
@@ -1045,7 +1044,6 @@ Notes:
 - ⏭️ and prove that the YAML data was correctly loaded by printing it.
 - This functionality is extremely useful in the Bones asset server, allowing us to automatically
   load YAML assets into Rust structs.
-- ⏭️
 
 ---
 
@@ -1053,26 +1051,27 @@ Notes:
 
 ### `Schema` for Runtime Defined Types
 
-<div style="font-size: 0.8em">
+`Schema`s can be derived or loaded from files at <string style="color: #22D491;">runtime</strong>
 
-- `Schema`s can be derived, but they can also be loaded from files at **runtime**.
-- All of the `Schema` features work the same for runtime-loaded schemas:
-  - Schema boxes
-  - Runtime field access
-  - Deserialization
-- Scripts & Bones ECS can access all the `#[repr(C)]` data regardless of it's source.
-
-</div>
+Everything works the same
 
 Note:
 
-- An important thing to note at this point is that schemas can be derived, but they can also be
+- So far all of our schemas have come from Rust structs, but schemas can also be loaded from files
+  at runtime, and everything works the same.
+- This is crucial for scripts that need to be able to store their own components in the Bones ECS,
+  even though there isn't Rust type for it.
+- Beyond that every Rust type that has that `#[repr(C)]` annotation will be able to have it's fields
+  read and written to from scripts, because it's schema tells the script exactly what the script is
+  allowed to do with the component.
+
+<!-- - An important thing to note at this point is that schemas can be derived, but they can also be
   loaded from files at runtime.
 - For example, mods can define their own schemas for types that never existed in Rust.
 - Even still, all of the schema features work the same.
 - You can store the data in schema boxes, or in the bones ECS, you can access fields at runtime, and
   you can deserialize the data using serde.
-- Scripts and the Bones ECS can access all of the `#[repr(C)]` data, regardless of it's source.
+- Scripts and the Bones ECS can access all of the `#[repr(C)]` data, regardless of it's source. -->
 
 ---
 
@@ -1080,28 +1079,22 @@ Note:
 
 ### Associated Type Data
 
-#### Use-Case
-
-<div style="font-size: 0.76em">
-
-- In our game, we know we will spawn thousands of certain components.
-- We want the ECS to pre-allocate storage for those components so we can avoid re-allocations later.
-- We create a `StorageMode` enum that tells the ECS whether we want to pre-allocate storage or
-  allocate on demand.
-- We add `StorageMode` as associated type data to our components.
-
-</div>
-
 Notes:
 
-- There's one more cool feature that I want to show you in Bones schema, and that's Associated Type Data.
+- There's one more nifty feature that I want to show you in Bones schema, and that is associated
+  type data.
+- Each schema has a type data store.
+- It's just a container that you can put anything you want in.
+- There are all kinds of things you can use this for, but it's easiest to explain with an example.
+
+<!-- - There's one more cool feature that I want to show you in Bones schema, and that's Associated Type Data.
 - Consider the following use-case: in our game, we know know that we will spawn thousands of certain components.
 - For example, maybe we have a bullet component, and there are machine guns in the game.
 - We want the ECS to pre-allocate storage for those components, so we can avoid re-allocations later.
 - What we can do is create a `StorageMode` enum that tells the ECS whether we want to pre-allocate
   storage or allocate on demand.
 - And then we can add our `StorageMode` enum as an associated type data to our components.
-- Lets see what that would look like. ⏭️
+- Lets see what that would look like. ⏭️ -->
 
 ---
 
@@ -1109,7 +1102,7 @@ Notes:
 
 ### Associated Type Data
 
-<pre style="font-size: 0.55em"><code data-line-numbers="3-8|10-16|18-23|20|21|25-32|46|47-49|46-57" data-noescape data-trim>
+<pre style="font-size: 0.55em"><code data-line-numbers="3-8|10-16|18-23|20-21|25-32|35-39|41|42-45|47-51" data-noescape data-trim>
 use bones_schema::prelude::*;
 
 #[derive(HasSchema, Clone, Default, Debug)]
@@ -1144,35 +1137,59 @@ struct Velocity {
 }
 
 fn main() {
-    let pos = Position { x: 10.0, y: 5.0 };
-    let vel = Velocity {
-        x: 2.0,
-        y: 4.0,
-        angular: 0.0,
-    };
-    let pos_box = SchemaBox::new(pos);
-    let vel_box = SchemaBox::new(vel);
+    let schemas = vec![
+      Position::schema(),
+      Velocity::schema(),
+      String::schema()
+    ];
 
-    let boxes = vec![pos_box, vel_box];
-
-    for my_box in &boxes {
-        let storage_mode: &StorageMode = my_box
-          .schema()
-          .type_data.get().unwrap();
+    for schema in schemas {
+        let storage_mode: Option<&StorageMode> = schema
+          .type_data
+          .get();
 
         dbg!(storage_mode);
-    }
 
-    // [src/main.rs:48:9] storage_mode = OnDemand
-    // [src/main.rs:48:9] storage_mode = PreAllocate(
-    //    12000,
-    // )
+        // [src/main.rs:40:9] storage_mode = Some(OnDemand)
+        // [src/main.rs:40:9] storage_mode = Some(PreAllocate(12000))
+        // [src/main.rs:40:9] storage_mode = None
+    }
 }
 </code></pre>
 
 Notes:
 
-- First we define our `StorageMode` enum, we have an `OnDemand` variant and a `PreAllocate` variant. ⏭️
+- Let's consider a potential use-case in our ECS.
+- When you add components to an entity, it allocates enough storage for that component on-demand.
+- If you were to spawn a bunch of entities, then it would re-allocate storage multiple times.
+- But if you knew that you were going to, for example, have thousands of our `Position` component,
+  it would be more efficient to allocate storage for say 10,000 positions up front.
+- We could indicate this by adding a `StorageMode` type data, to our `Position` component.
+- For example, here we defined a simple storage mode enum that has an `OnDemand` option and a
+  `PreAllocate` option. ⏭️
+- Then we come down to our `Position` component and we our chosen storage mode in with a
+  `#[type_data]` annotation.
+- In this case, we say we want positions to be allocated on demand.
+- And it's that simple.
+- We can add any rust expression inside the type data annotation, so we make function calls to get
+  the type data, or add structs with parameters, it really flexible. ⏭️
+- Another thing we can do is we can derive type data.
+- In order to make our `StorageMode` enum derivable, we have to implement the `FromType` trait for
+  it.
+- This is a contrived example, ⏭️ but here we are saying that if you derive `StorageMode` on any type
+  `T`, it will `PreAllocate` 1000 times the size of the the type `T`. ⏭️
+- After we've done that, we can derive the type data with the `derive_type_data` attribute.
+- It's all super simple. ⏭️
+- And now we want to see how we'd use the type data.
+- Lets pretend that we're the ECS, and we have a list of schemas that we need to allocate storage for.
+- Notice I threw the schema for `String` in there, to, which doesn't have a `StorageMode` type data. ⏭️
+- We loop over each schema. ⏭️
+- And for each one we get the `StorageMode` out of it's type data. ⏭️
+- And in this case, we just print it out.
+- We can see that we have the storage modes for `Position` and `Velocity`, and that for `String` it wasn't set.
+
+
+<!-- - First we define our `StorageMode` enum, we have an `OnDemand` variant and a `PreAllocate` variant. ⏭️
 - Next we can use the `#[type_data]` attribute to set the storage mode to on-demand for our `Position` struct.
 - Adding type data is super easy!
 - You can even add the attribute multiple times to associate more type data.
@@ -1194,7 +1211,24 @@ Notes:
 - This time, we get the schema, and load the `StorageMode` from it's type data. ⏭️
 - And we can print out the storage mode for each item. ⏭️
 - The cool part about all of this is that you can use it for whatever you want!
-- It's kind of like the bones schema version of implementing a trait. ⏭️
+- It's kind of like the bones schema version of implementing a trait. ⏭️ -->
+
+---
+
+### Use Cases for Type Data
+
+- Asset loaders
+- Custom Deserializers
+- Bindings for scripts
+
+Notes:
+
+- There are a lot of possible uses for type data.
+- In bones we use them to specify asset loaders and custom deserializers when the default one isn't
+  sufficient.
+- Eventually you'll be able to use them specify customized bindings to scripting languages.
+- They're basically the traits of the Bones Schema world, and like everything else in the crate,
+  focus on giving you more access at runtime, to things that normally only work at compile time.
 
 ---
 
@@ -1210,7 +1244,11 @@ Notes:
 
 Notes:
 
-- And that brings us to the end of the talk.
+- And that wraps things up.
+- I'm super excited about what we've accomplished so far, I'm really grateful for all the work that
+  has gone before us, and I can't wait to see what's next.
 - Bones and everything in it are public on GitHub so if you're interested you can check it out!
-- Feel free to try and make a game with it, and reach out to us on Discord or GitHub if you have any questions or challenges.
-- Thanks for watching!
+- We'll have a Q&A session here if you have any questions, and if we don't to to your question,
+  definitely feel free to reach out to us on Discord or GitHub.
+- We're always happy to chat.
+- Thanks for having me on here, and thanks for listening everyone!
